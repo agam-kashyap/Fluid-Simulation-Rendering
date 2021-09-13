@@ -8,12 +8,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules")
 
-
-# set(GCC_CXX_FLAGS "${GCC_CXX_FLAGS} -lXi")
-# set(GCC_CXX_FLAGS "${GCC_CXX_FLAGS} -lXxf86vm")
-# set(GCC_CXX_FLAGS "${GCC_CXX_FLAGS} -lX11")
-# set(GCC_CXX_FLAGS "${GCC_CXX_FLAGS} -Xrandr")
-
 include_directories(.)
 
 add_subdirectory(freeglut)
