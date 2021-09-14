@@ -1,18 +1,9 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(ACG VERSION 0.1.0)
 
-
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules")
-
 include_directories(.)
 
-add_subdirectory(freeglut)
 add_subdirectory(SimHelper)
-set_target_properties(helper PROPERTIES LINKER_LANGUAGE CXX)
 add_subdirectory(Simulation)
 add_subdirectory(Render-Marching)
 add_subdirectory(Project)
