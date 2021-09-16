@@ -6,6 +6,10 @@
 
 #include <functional>
 
+namespace Helper
+{
+    class Volume;
+}
 namespace SPH
 {
     class Collision

@@ -26,7 +26,6 @@ namespace SPH
     Simulation::Simulation(const std::function<float(float, float, float)>* obstacle):
         particles(Config::ParticleCount),
         SimulationVolume(Helper::Volume(Helper::Cuboid(Helper::Point3D(), Config::BoxWidth, Config::BoxHeight, Config::BoxDepth))),
-        //neighbourhood searcher
         octree(),
         params(),
         SimulationObstacle(obstacle)
@@ -67,15 +66,21 @@ namespace SPH
                     N += 2;
                 }
             }
+            params.copyPoints = true;
             octree.initialize(particles);
+            std::cout << "Octree initialised" << std::endl;
         }
     
     void Simulation::Run()
     {
+        // octree.initialize(particles, params);
+        std::cout <<"Root Value octant: " << std::to_string(octree.root_->x)  << " " << std::to_string(octree.root_->y)  << " " << std::to_string(octree.root_->z)  << " " << std::to_string(particles.size())<< std::endl;
         // Search for neighbours and update it
         for(size_t i=0u; i < Config::ParticleCount; i++)
         {
             octree.radiusNeighbors<unibn::L2Distance<Particle>>(particles[i], Config::SupportRadius, particles[i].neighbours);
+            std::cout << particles[i].neighbours.size() << " radius neighbors (r = 1m) found for (" << particles[i].position.x << ", " << particles[i].position.y << ","
+            << particles[i].position.z << ")" << std::endl;
         }
 
         Forces::ComputeAllForces(particles);

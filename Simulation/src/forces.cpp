@@ -29,6 +29,7 @@ namespace SPH {
             for(size_t j = 0; j < particleVec[i].neighbours.size(); j++)
             {
                 const Helper::Point3D diffParticleNeighbour = particleVec[i].position - particleVec[particleVec[i].neighbours[j]].position;
+
                 if(Config::SupportRadius - diffParticleNeighbour.calcNorm() > DBL_EPSILON)
                 {
                     particleVec[i].density = Config::WaterParticleMass* Kernel_Coeff;

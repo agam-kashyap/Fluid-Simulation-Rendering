@@ -2,7 +2,7 @@
 
 namespace SPH
 {
-    const size_t Config::ParticleCount = 600;
+    const size_t Config::ParticleCount = 60;
     const double Config::ParticleRadius = 0.015;
     const double Config::Elasticity = 0.5;
     const Helper::Point3D Config::InitVelocity (0.0,0.0,0.0);
@@ -11,7 +11,7 @@ namespace SPH
     const double Config::WaterStiffness = 3.0; //Figure out it's value.
     const double Config::WaterDensity = 999.0;
 
-    const double Config::SupportRadius = 0.1;
+    const double Config::SupportRadius = 5;
 
     //Simulation Constraints
     const double Config::BoxWidth = 3.0;

@@ -136,6 +136,7 @@ struct L2Distance
 
   static inline float norm(float x, float y, float z)
   {
+    // std::cout << std::pow(x, 2) + std::pow(y, 2) + std::pow(z, 2) << std::endl;
     return std::pow(x, 2) + std::pow(y, 2) + std::pow(z, 2);
   }
 
@@ -259,7 +260,8 @@ class Octree
   template <typename Distance>
   int32_t findNeighbor(const PointT& query, float minDistance = -1) const;
 
- protected:
+//  protected:
+public:
   class Octant
   {
    public:
@@ -279,8 +281,8 @@ class Octree
   };
 
   // not copyable, not assignable ...
-  // Octree(Octree&);
-  // Octree& operator=(const Octree& oct);
+  Octree(Octree&);
+  Octree& operator=(const Octree& oct);
 
   /**
    * \brief creation of an octant using the elements starting at startIdx.
@@ -353,6 +355,17 @@ class Octree
   friend class ::OctreeTest;
 };
 
+/*********************************/
+template <typename PointT, typename ContainerT>
+Octree<PointT, ContainerT>& Octree<PointT, ContainerT>::operator=(const Octree& oct)
+{
+  params_ = oct.params_;
+  root_ = oct.root_;
+  data_ = oct.data_;
+  successors_ = oct.successors_;
+  return *this;
+}
+/********************************/
 template <typename PointT, typename ContainerT>
 Octree<PointT, ContainerT>::Octant::Octant()
     : isLeaf(true), x(0.0f), y(0.0f), z(0.0f), extent(0.0f), start(0), end(0), size(0)
@@ -376,6 +389,7 @@ template <typename PointT, typename ContainerT>
 Octree<PointT, ContainerT>::~Octree()
 {
   delete root_;
+  std::cout << "Deleting tree.." << std::endl;
   if (params_.copyPoints) delete data_;
 }
 
@@ -409,6 +423,7 @@ void Octree<PointT, ContainerT>::initialize(const ContainerT& pts, const OctreeP
 
     const PointT& p = pts[i];
 
+    // std::cout << std::to_string(get<0>(p)) << " " << std::to_string(get<1>(p)) << " " << std::to_string(get<2>(p)) << std::endl;
     if (get<0>(p) < min[0]) min[0] = get<0>(p);
     if (get<1>(p) < min[1]) min[1] = get<1>(p);
     if (get<2>(p) < min[2]) min[2] = get<2>(p);
@@ -427,6 +442,8 @@ void Octree<PointT, ContainerT>::initialize(const ContainerT& pts, const OctreeP
     ctr[i] += extent;
     if (extent > maxextent) maxextent = extent;
   }
+  // std::cout << "Max Extent: " << std::to_string(maxextent) << std::endl << "Root Values: ";
+  // std::cout << std::to_string(ctr[0]) <<" " << std::to_string(ctr[1]) <<" "<< std::to_string(ctr[2]) << std::endl;
 
   root_ = createOctant(ctr[0], ctr[1], ctr[2], maxextent, 0, N - 1, N);
 }
@@ -488,6 +505,7 @@ void Octree<PointT, ContainerT>::initialize(const ContainerT& pts, const std::ve
   }
 
   root_ = createOctant(ctr[0], ctr[1], ctr[2], maxextent, indexes[0], lastIdx, indexes.size());
+  
 }
 
 template <typename PointT, typename ContainerT>
@@ -514,6 +532,7 @@ typename Octree<PointT, ContainerT>::Octant* Octree<PointT, ContainerT>::createO
   octant->y = y;
   octant->z = z;
   octant->extent = extent;
+  // std::cout << std::to_string(octant->extent) << std::endl;
 
   octant->start = startIdx;
   octant->end = endIdx;
@@ -592,6 +611,7 @@ void Octree<PointT, ContainerT>::radiusNeighbors(const Octant* octant, const Poi
   const ContainerT& points = *data_;
 
   // if search ball S(q,r) contains octant, simply add point indexes.
+  // std::cout << octant->extent << std::endl;
   if (contains<Distance>(query, sqrRadius, octant))
   {
     uint32_t idx = octant->start;
@@ -748,6 +768,9 @@ bool Octree<PointT, ContainerT>::contains(const PointT& query, float sqRadius, c
   x = std::abs(x);
   y = std::abs(y);
   z = std::abs(z);
+  // std::cout << "--" << std::to_string(x) << " " << std::to_string(y) << " " << std::to_string(z) << " " << std::to_string(sqRadius) << " " << std::to_string(o->extent) << std::endl;
+  // std::cout << "--" << std::to_string(Distance::norm(x,y,z)) << std::endl;
+
   // reminder: (x, y, z) - (-e, -e, -e) = (x, y, z) + (e, e, e)
   x += o->extent;
   y += o->extent;

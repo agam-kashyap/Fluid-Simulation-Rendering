@@ -115,6 +115,8 @@ void MyDisplay(void)
     gluLookAt(7.0, 8.0, 5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
     glRotatef(angle, -1, 0, 0);
 
+    static const std::function<float(float, float, float)> obstacle = Helper::Shapes::Pawn;
+    sph = SPH::Simulation(&obstacle);
     sph.Run();
 
     const float cubeSize = static_cast<float>(SPH::Config::BoxWidth);
@@ -251,7 +253,7 @@ void processSpecialKeys(int key, int /*xx*/, int /*yy*/)
 void Draw::MainDraw(int argc, char** argv)
 {
     static const std::function<float(float, float, float)> obstacle = Helper::Shapes::Pawn;
-    sph = SPH::Simulation(&obstacle);
+    // sph = SPH::Simulation(&obstacle);
 
     mesh = Helper::MarchingCubes::generateMesh(obstacle);
 

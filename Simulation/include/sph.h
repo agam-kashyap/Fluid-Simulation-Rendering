@@ -14,7 +14,7 @@ namespace unibn
         template <>
         struct access<SPH::Particle, 0>
         {
-            static float get(const SPH::Particle& p)
+            static double get(const SPH::Particle& p)
             {
                 return p.position.x;
             }
@@ -23,7 +23,7 @@ namespace unibn
         template <>
         struct access<SPH::Particle, 1>
         {
-            static float get(const SPH::Particle& p)
+            static double get(const SPH::Particle& p)
             {
                 return p.position.y;
             }
@@ -32,7 +32,7 @@ namespace unibn
         template <>
         struct access<SPH::Particle, 2>
         {
-            static float get(const SPH::Particle& p)
+            static double get(const SPH::Particle& p)
             {
                 return p.position.z;
             }
@@ -53,7 +53,6 @@ namespace SPH
         
         private:
             Helper::Volume SimulationVolume;
-            // Neighbourhood Search
             unibn::Octree<Particle> octree;
             unibn::OctreeParams params;
             const std::function<float(float, float, float)>* SimulationObstacle;
