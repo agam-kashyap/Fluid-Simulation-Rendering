@@ -20,7 +20,7 @@ static int height = 900;
 
 static float angle = 360;
 
-static SPH::Simulation sph;
+static SPH::Simulation* sph;
 
 static Helper::Point3FVector mesh;
 
@@ -28,7 +28,6 @@ void renderSphere(float x, float y, float z, double radius, double velocity, int
 {
     glPushMatrix();
     glTranslatef(x, y, z);
-
     float red = 0.f;
     float blue = 0.f;
     float green = 0.f;
@@ -115,9 +114,7 @@ void MyDisplay(void)
     gluLookAt(7.0, 8.0, 5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
     glRotatef(angle, -1, 0, 0);
 
-    static const std::function<float(float, float, float)> obstacle = Helper::Shapes::Pawn;
-    sph = SPH::Simulation(&obstacle);
-    sph.Run();
+    sph->Run();
 
     const float cubeSize = static_cast<float>(SPH::Config::BoxWidth);
 
@@ -130,8 +127,11 @@ void MyDisplay(void)
     }
     glEnd();
 
-    for (auto& particle : sph.particles)
+    for (auto& particle : sph->particles)
     {
+        
+        // std::cout << std::to_string(particle.position.x) << " " << std::to_string(particle.position.y) << " " << std::to_string(particle.position.z) << std::endl;
+        
         renderSphere_convenient(static_cast<float>(particle.position.x), static_cast<float>(particle.position.y),
                                 static_cast<float>(particle.position.z), particle.radius,
                                 particle.velocity.calcNormSqr(), 4);
@@ -253,7 +253,7 @@ void processSpecialKeys(int key, int /*xx*/, int /*yy*/)
 void Draw::MainDraw(int argc, char** argv)
 {
     static const std::function<float(float, float, float)> obstacle = Helper::Shapes::Pawn;
-    // sph = SPH::Simulation(&obstacle);
+    sph = new SPH::Simulation(&obstacle);
 
     mesh = Helper::MarchingCubes::generateMesh(obstacle);
 
@@ -288,7 +288,7 @@ void Draw::MainDraw(int argc, char** argv)
     glutTimerFunc(0, timf, 0);
 
     // set up color
-    glClearColor(0., 0., 0., 0);
+    glClearColor(1., 1., 1., 1.0);
 
     // enter the GLUT event processing loop
     glutMainLoop();

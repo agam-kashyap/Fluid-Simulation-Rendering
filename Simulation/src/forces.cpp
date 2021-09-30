@@ -6,7 +6,7 @@
 #include <cassert>
 
 namespace SPH {
-    static const double PI_hpow9 = M_PI * pow(Config::SupportRadius, 9);
+    static const double PI_hpow9 = M_PI * pow(Config::SmootheningLength, 9);
     static const double Kernel_Coeff = 315.0 / (64.0 * PI_hpow9); //Made from polynomial kernel
     static const double SpikyKernel_Coeff = 45/(M_PI * pow(Config::SupportRadius, 6));
 
@@ -32,7 +32,8 @@ namespace SPH {
 
                 if(Config::SupportRadius - diffParticleNeighbour.calcNorm() > DBL_EPSILON)
                 {
-                    particleVec[i].density = Config::WaterParticleMass* Kernel_Coeff;
+                    particleVec[i].density = Config::WaterParticleMass* defaultKernel(diffParticleNeighbour);
+                    if(particleVec[i].density <= 0.0)std::cout << std::to_string(particleVec[i].density) << " " << std::to_string(i)<<","<<std::to_string(j) << std::endl;
                 }
             }
         }
@@ -53,7 +54,7 @@ namespace SPH {
             particleVec[i].fPressure = Helper::Point3D();
             particleVec[i].fViscosity = Helper::Point3D();
             
-            for(size_t j=0; j < particleVec.size(); j++)
+            for(size_t j=0; j < particleVec[i].neighbours.size(); j++)
             {
                 assert(std::abs(particleVec[i].density) > 0.);
                 assert(std::abs(particleVec[particleVec[i].neighbours[j]].density) > 0.);

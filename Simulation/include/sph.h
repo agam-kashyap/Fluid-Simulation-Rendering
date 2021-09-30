@@ -16,6 +16,7 @@ namespace unibn
         {
             static double get(const SPH::Particle& p)
             {
+                // std::cout << "get 0 "<< std::to_string(p.position.x) << std::endl;
                 return p.position.x;
             }
         };
@@ -25,6 +26,7 @@ namespace unibn
         {
             static double get(const SPH::Particle& p)
             {
+                // std::cout << "get 1 "<< std::to_string(p.position.y) << std::endl;
                 return p.position.y;
             }
         };
@@ -51,7 +53,7 @@ namespace SPH
 
             ParticleVec particles;
         
-        private:
+        public:
             Helper::Volume SimulationVolume;
             unibn::Octree<Particle> octree;
             unibn::OctreeParams params;

@@ -18,8 +18,12 @@ namespace SPH
         static const double WaterParticleMass;
         static const double WaterStiffness;
         static const double WaterDensity;
-        static const double SupportRadius; //~h -> Kernel Support Radius -> Needed for ensuring Compact support condition
-
+        static const double SupportRadius; //~h -> Compact Support Radius -> Needed for ensuring Compact support condition
+        static const double SmootheningLength; // h-> Smoothening length of Kernel
+        static const double ScalingParam;
+        static const double CompressionControl; // ita -> Used in Controlling compression
+        static const double PressureIters;
+        static const double RelaxationFactor;
         //Simulation Condition
         static const double BoxWidth;
         static const double BoxHeight;

@@ -7,7 +7,9 @@ namespace SPH
 {
     static Helper::Point3D collisionPoint(Helper::Point3D particlePos, Helper::Point3D directionVec)
     {
-        return particlePos - (directionVec/directionVec.calcNorm()) * Config::ParticleRadius;
+        // std::cout << std::to_string(directionVec.x) << " " <<std::to_string(directionVec.y) <<" " << std::to_string(directionVec.z) << "::::";
+        // std::cout << std::to_string(directionVec.calcNorm()) << " " << std::to_string((directionVec/directionVec.calcNorm()).x)  << std::endl;
+        return particlePos + (directionVec/directionVec.calcNorm()) * Config::ParticleRadius;
     }
 
     static double dotProduct(Helper::Point3D vecA, Helper::Point3D vecB)
@@ -17,8 +19,12 @@ namespace SPH
 
     static bool isIntersecting(Helper::Point3D vecA, Helper::Point3D vecB)
     {
-        double dist = (vecA - vecB).calcNorm();
-        if(std::abs(dist) < 2*Config::ParticleRadius) return true;
+        double dist = (vecA - vecB).calcNormSqr();
+        if(dist < Config::ParticleRadius*Config::ParticleRadius)
+        {
+            // std::cout << "Point A: " << vecA << " PointB: " << vecB << " " << std::to_string(dist) << std::endl;
+            return true;
+        }
         else return false;
     }
     void Collision::detectCollisions(ParticleVec& particleVec, const Helper::Volume& volume, const std::function<float(float, float, float)>* obstacle)
@@ -28,13 +34,14 @@ namespace SPH
             // Particle Particle Collision
             for(size_t j=0; j< particleVec[i].neighbours.size(); j++)
             {
+                if(i == particleVec[i].neighbours[j])continue;
                 if(isIntersecting(particleVec[particleVec[i].neighbours[j]].position, particleVec[i].position))
                 {
                     Helper::Point3D directionVec = particleVec[i].position - particleVec[particleVec[i].neighbours[j]].position;
                     
                     particleVec[i].velocity = -0.5 * (1 + Config::Elasticity) * dotProduct(particleVec[i].velocity - particleVec[particleVec[i].neighbours[j]].velocity,
                                                                                 directionVec) * directionVec/ directionVec.calcNormSqr();
-                    particleVec[i].position = collisionPoint(particleVec[i].position, directionVec);
+                    particleVec[i].position = collisionPoint(particleVec[i].position, directionVec); 
                 }
             }
             // Particle Boundary Collision

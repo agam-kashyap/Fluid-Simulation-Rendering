@@ -2,6 +2,8 @@
 #define POINT
 
 #include <vector>
+#include <ostream>
+
 namespace Helper
 {
     template <typename T> class Point2
@@ -40,8 +42,10 @@ namespace Helper
 
             auto calcNormSqr() const;
             auto calcNorm() const;
+            auto dot(const Point3& p);
 
             Point3& operator=(const Point3& p);
+            // std::ostream& operator<<(ostream& os, Point3& p);
 
             T x, y, z;
     };

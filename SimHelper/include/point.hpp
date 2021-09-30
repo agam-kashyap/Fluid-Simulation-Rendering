@@ -3,6 +3,7 @@
 
 #include "point.h"
 #include <cmath>
+#include <ostream>
 
 namespace Helper
 {
@@ -115,6 +116,11 @@ namespace Helper
         return std::sqrt(x*x + y*y + z*z);
     }    
 
+    template<typename T>
+    inline auto Point3<T>::dot(const Point3<T>& p)
+    {
+        return x*p.x + y*p.y + z*p.z;
+    }
     template <typename T>
     inline Point3<T>& Point3<T>::operator=(const Point3& p)
     {
@@ -125,6 +131,11 @@ namespace Helper
         return *this;
     }
 
+    template <typename T>
+    inline std::ostream& operator<<(std::ostream& os, const Point3<T>&p)
+    {
+        return os << "X: " << std::to_string(p.x) << " Y: " << std::to_string(p.y) << " Z: " << std::to_string(p.z);
+    }
     template <typename T>
     static inline bool operator==(const Point3<T>& p1, const Point3<T>& p2)
     {

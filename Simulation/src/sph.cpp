@@ -3,6 +3,7 @@
 #include "../include/collisions.h"
 #include "../include/config.h"
 #include "../include/forces.h"
+#include "../include/iisph-forces.h"
 // #include "Integrator.h"
 
 
@@ -30,62 +31,48 @@ namespace SPH
         params(),
         SimulationObstacle(obstacle)
         {
-            double r = 2 * Config::ParticleRadius;
-            double fi = 0.;
-            double teta = 0.;
+            double x_pos = Config::ParticleRadius;// + 1.5;
+            double y_pos = Config::ParticleRadius;// + 1.5;
+            double z_pos = Config::ParticleRadius;// + 1.5;
 
-            size_t M = 5;
-            size_t N = 5;
-
-            size_t m = 0;
-            size_t n = 0;
-        
             for(size_t i = 0u; i < Config::ParticleCount; i++)
             {
-                particles[i] = SpericalToCartesian(r, fi, teta);
+                // particles[i] = SpericalToCartesian(r, fi, teta);
+                particles[i] = Helper::Point3D(x_pos, y_pos, z_pos);
                 particles[i].velocity = Config::InitVelocity;
                 particles[i].mass = Config::WaterParticleMass;
-
-                ++n;
-
-                fi = 2 * PI * n / N;
-                teta = PI * m / M;
-
-                if (n == N)
+                //-----------------Arranges in a Dam Shaped Structure -------
+                x_pos += 2* Config::ParticleRadius;
+                if(x_pos > 1.0)
                 {
-                    ++m;
-                    n = 0;
+                    x_pos = Config::ParticleRadius ;//+ 1.5;
+                    y_pos += 2*Config::ParticleRadius;
                 }
-
-                if (m == M)
+                if(y_pos > 1.0)
                 {
-                    n = 0;
-                    m = 0;
-                    r += 2 * Config::ParticleRadius;
-                    M += 2;
-                    N += 2;
+                    y_pos = Config::ParticleRadius ;//+ 1.5;
+                    z_pos += 2*Config::ParticleRadius;
                 }
             }
             params.copyPoints = true;
+
             octree.initialize(particles);
             std::cout << "Octree initialised" << std::endl;
         }
     
     void Simulation::Run()
     {
-        // octree.initialize(particles, params);
-        std::cout <<"Root Value octant: " << std::to_string(octree.root_->x)  << " " << std::to_string(octree.root_->y)  << " " << std::to_string(octree.root_->z)  << " " << std::to_string(particles.size())<< std::endl;
         // Search for neighbours and update it
+        std::cout << "Neighbour Search Begins" << std::endl;
         for(size_t i=0u; i < Config::ParticleCount; i++)
         {
             octree.radiusNeighbors<unibn::L2Distance<Particle>>(particles[i], Config::SupportRadius, particles[i].neighbours);
-            std::cout << particles[i].neighbours.size() << " radius neighbors (r = 1m) found for (" << particles[i].position.x << ", " << particles[i].position.y << ","
-            << particles[i].position.z << ")" << std::endl;
         }
-
-        Forces::ComputeAllForces(particles);
-        //Integrate -> Advect the particles
-
+        IISPHForces::predict_advection(particles);
+        
+        IISPHForces::pressureSolve(particles);
+        IISPHForces::integration(particles);
+        std::cout <<"Post Integration: " << particles[0].position << " " << std::to_string(particles.size())<< std::endl;
         Collision::detectCollisions(particles, SimulationVolume, SimulationObstacle);
     }
 }
