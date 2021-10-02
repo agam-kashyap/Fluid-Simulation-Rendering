@@ -158,7 +158,7 @@ namespace Helper
     }
 
     template <typename T>
-    static inline Point3<T> operator+=(Point3<T>& p1, const Point3<T>& p2)
+    inline Point3<T> operator+=(Point3<T>& p1, const Point3<T>& p2)
     {
         p1.x += p2.x;
         p1.y += p2.y;
@@ -168,19 +168,19 @@ namespace Helper
     }
 
     template <typename T>
-    static inline Point3<T> operator+(const Point3<T>& p1, const Point3<T>& p2)
+    inline Point3<T> operator+(const Point3<T>& p1, const Point3<T>& p2)
     {
-        return Point3<T>(static_cast<T>(p1.x + p2.x), static_cast<T>(p1.y + p2.y), static_cast<T>(p1.z + p2.z));
+        return Point3<T>(p1.x + p2.x, p1.y + p2.y, p1.z + p2.z);
     }
 
     template <typename T>
-    static inline Point3<T> operator-(const Point3<T>& p1, const Point3<T>& p2)
+    inline Point3<T> operator-(const Point3<T>& p1, const Point3<T>& p2)
     {
         return Point3<T>(static_cast<T>(p1.x - p2.x), static_cast<T>(p1.y - p2.y), static_cast<T>(p1.z - p2.z));
     }
 
     template <typename T>
-    static inline Point3<T> operator-(const Point3<T>& p1)
+    inline Point3<T> operator-(const Point3<T>& p1)
     {
         return Point3<T>(static_cast<T>(-p1.x), static_cast<T>(-p1.y), static_cast<T>(-p1.z));
     }
