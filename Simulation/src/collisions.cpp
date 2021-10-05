@@ -5,6 +5,7 @@
 
 namespace SPH
 {
+    static const double timestep = Config::ParticleRadius*2 * Config::ScalingParam/Config::SpeedThreshold; //Redefine the vmax -> Think about how to decide
     static Helper::Point3D collisionPoint(Helper::Point3D particlePos, Helper::Point3D directionVec)
     {
         // std::cout << std::to_string(directionVec.x) << " " <<std::to_string(directionVec.y) <<" " << std::to_string(directionVec.z) << "::::";
@@ -20,7 +21,7 @@ namespace SPH
     static bool isIntersecting(Helper::Point3D vecA, Helper::Point3D vecB)
     {
         double dist = (vecA - vecB).calcNormSqr();
-        if(dist < Config::ParticleRadius*Config::ParticleRadius)
+        if(dist < 4*Config::ParticleRadius*Config::ParticleRadius)
         {
             // std::cout << "Point A: " << vecA << " PointB: " << vecB << " " << std::to_string(dist) << std::endl;
             return true;
@@ -39,9 +40,9 @@ namespace SPH
                 {
                     Helper::Point3D directionVec = particleVec[i].position - particleVec[particleVec[i].neighbours[j]].position;
                     
-                    particleVec[i].velocity = -0.5 * (1 + Config::Elasticity) * dotProduct(particleVec[i].velocity - particleVec[particleVec[i].neighbours[j]].velocity,
-                                                                                directionVec) * directionVec/ directionVec.calcNormSqr();
-                    particleVec[i].position = collisionPoint(particleVec[i].position, directionVec); 
+                    particleVec[i].velocity += -0.5 * (1 - Config::Elasticity) * dotProduct(particleVec[i].velocity - particleVec[particleVec[i].neighbours[j]].velocity,
+                                                                                directionVec) * directionVec/ directionVec.calcNormSqr(); //It should be summation of all directions.
+                    // particleVec[i].position = collisionPoint(particleVec[i].position, directionVec); 
                 }
             }
             // Particle Boundary Collision
@@ -91,6 +92,10 @@ namespace SPH
                 particleVec[i].position = particleVec[i].prev_position;
                 particleVec[i].velocity = particleVec[i].velocity*(-1)*Config::Elasticity;
             }
+        }
+        for(size_t i=0; i< particleVec.size(); i++)
+        {
+            particleVec[i].position += particleVec[i].velocity * timestep;
         }
     }
 }

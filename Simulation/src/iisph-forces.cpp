@@ -1,9 +1,11 @@
 #include "../include/iisph-forces.h"
+#include <Log.hpp>
 
 #define _USE_MATH_DEFINES
 #include <cfloat>
 #include <math.h>
 #include <cassert>
+#include <omp.h>
 
 namespace SPH
 {
@@ -35,8 +37,10 @@ namespace SPH
     // ------------------------------- Predict Advection ---------------------------------------------
     void IISPHForces::compute_density(ParticleVec& particleVec)
     {
+        // #pragma omp parallel for 
         for(size_t i=0; i < particleVec.size(); i++)
         {
+            // #pragma omp parallel for 
             for(size_t j = 0; j < particleVec[i].neighbours.size(); j++)
             {
                 if(i == particleVec[i].neighbours[j])continue;
@@ -54,14 +58,17 @@ namespace SPH
     }
     void IISPHForces::compute_gravity_force(ParticleVec& particleVec)
     {
+        // #pragma omp parallel for 
         for(auto& particle: particleVec)
         {
-            particle.fGravity = Config::GravitationalAcceleration * particle.density;
+            particle.fGravity = Config::GravitationalAcceleration * particle.mass;
+            // particle.fGravity = Config::GravitationalAcceleration * particle.density;
             // std::cout << particle.fGravity << std::endl;
         }
     }
     void IISPHForces::compute_advection_forces(ParticleVec& particleVec)
     {
+        // #pragma omp parallel for 
         for(auto& particle: particleVec)
         {
             particle.fAdvection = particle.fGravity; //+ other forces;
@@ -70,6 +77,7 @@ namespace SPH
     }
     void IISPHForces::compute_predicted_velocity(ParticleVec& particleVec)
     {
+        // #pragma omp parallel for 
         for(auto& particle: particleVec)
         {
             particle.predicted_velocity = particle.velocity + timestep*particle.fAdvection/particle.mass;
@@ -78,8 +86,10 @@ namespace SPH
     }
     void IISPHForces::compute_DII(ParticleVec& particleVec)
     {
+        // #pragma omp parallel for 
         for(size_t i=0; i < particleVec.size(); i++)
         {
+            // #pragma omp parallel for 
             for(size_t j=0; j< particleVec[i].neighbours.size(); j++)
             {
                 if(i == particleVec[i].neighbours[j])continue;
@@ -101,6 +111,8 @@ namespace SPH
             {
                 if(i == particleVec[i].neighbours[j])continue;
                 const Helper::Point3D diffParticleNeighbour = particleVec[i].position - particleVec[particleVec[i].neighbours[j]].position;
+
+                // #pragma omp parallel for 
                 if(Config::SupportRadius - diffParticleNeighbour.calcNorm() > DBL_EPSILON)
                 {
                     particleVec[i].predicted_density +=  timestep* particleVec[particleVec[i].neighbours[j]].mass * (particleVec[i].predicted_velocity - particleVec[particleVec[i].neighbours[j]].predicted_velocity).dot(PolyKernelGradient(diffParticleNeighbour))/(particleVec[i].density*particleVec[i].density); 
@@ -132,6 +144,7 @@ namespace SPH
     //--------------------Pressure Solve----------------------------------------------------
     void IISPHForces::computeSumDIJ(ParticleVec& particleVec, int i)
     {
+        // #pragma omp parallel for 
         for(size_t j=0; j< particleVec[i].neighbours.size(); j++)
         {
             if(i == particleVec[i].neighbours[j])continue;
@@ -139,7 +152,7 @@ namespace SPH
 
             // std::cout << particleVec[i].curr_iterate_pressure << std::endl;
 
-            Helper::Point3D diffParticleNeighbour = particleVec[i].position - particleVec[particleVec[i].neighbours[j]].position;
+            const Helper::Point3D diffParticleNeighbour = particleVec[i].position - particleVec[particleVec[i].neighbours[j]].position;
             particleVec[i].sigma_dij += -1 * timestep * timestep * particleVec[particleVec[i].neighbours[j]].mass * particleVec[particleVec[i].neighbours[j]].prev_iterate_pressure * (SpikyKernelGradient(diffParticleNeighbour));
             // std::cout << particleVec[i].sigma_dij << std::endl;
             // std::cout <<  particleVec[particleVec[i].neighbours[j]].curr_iterate_pressure << std::endl;
@@ -156,14 +169,18 @@ namespace SPH
                 // std::cout << particleVec[i].curr_iterate_pressure << std::endl;
                 computeSumDIJ(particleVec, i); // ---->This Step computes the sigma d_ij*p_j^l
             }
+
             for(size_t i=0; i<particleVec.size(); i++)
             {
                 double corr_density=0.0;
+                
+                // #pragma omp parallel for 
                 for(size_t j=0; j< particleVec[i].neighbours.size(); j++)
                 {
                     if(i==particleVec[i].neighbours[j])continue;
-                    Helper::Point3D diffParticleNeighbour = particleVec[particleVec[i].neighbours[j]].position - particleVec[i].position; 
+                    const Helper::Point3D diffParticleNeighbour = particleVec[particleVec[i].neighbours[j]].position - particleVec[i].position; 
                     Helper::Point3D dji = -1 * timestep * timestep * (particleVec[particleVec[i].neighbours[j]].mass/(particleVec[particleVec[i].neighbours[j]].density*particleVec[particleVec[i].neighbours[j]].density))*SpikyKernelGradient(diffParticleNeighbour);
+                    // std::cout << diffParticleNeighbour << std::endl;
                     // std::cout << dji << std::endl;
                     corr_density += particleVec[particleVec[i].neighbours[j]].mass * (particleVec[i].sigma_dij - (particleVec[particleVec[i].neighbours[j]].dii * particleVec[particleVec[i].neighbours[j]].prev_iterate_pressure) - 
                                                                                 (particleVec[particleVec[i].neighbours[j]].sigma_dij - dji)).dot(SpikyKernelGradient(-1*diffParticleNeighbour));
@@ -182,6 +199,7 @@ namespace SPH
     double IISPHForces::ErrorDensity(ParticleVec& particleVec)
     {
         double avg_density=0;
+        // #pragma omp parallel for
         for(size_t i=0; i< particleVec.size(); i++)
         {
             // std::cout << particleVec[i].curr_iterate_pressure << std::endl;
@@ -190,24 +208,29 @@ namespace SPH
         return avg_density/particleVec.size() - Config::WaterDensity;
     }
     //-------------------------------Integrate IISPHForces and change velocity and Advect-------------------------------
-    Helper::Point3D compute_pressure_force(ParticleVec& pV, int i)
+    Helper::Point3D compute_pressure_force(ParticleVec& particleVec, int i)
     {
         Helper::Point3D forceSum = Helper::Point3D();
-        for(size_t j=0; j < pV[i].neighbours.size(); j++)
+        // #pragma omp parallel for
+        for(size_t j=0; j < particleVec[i].neighbours.size(); j++)
         {
-            if(i == pV[i].neighbours[j])continue;
-            Helper::Point3D diffParticleNeighbour = pV[i].position - pV[pV[i].neighbours[j]].position;
-            forceSum += pV[pV[i].neighbours[j]].mass * ((pV[i].pressure/pow(pV[i].density,2)) + (pV[pV[i].neighbours[j]].pressure/pow(pV[pV[i].neighbours[j]].density,2))) * SpikyKernelGradient(diffParticleNeighbour);
+            if(i == particleVec[i].neighbours[j])continue;
+            const Helper::Point3D diffParticleNeighbour = particleVec[i].position - particleVec[particleVec[i].neighbours[j]].position;
+            forceSum += particleVec[particleVec[i].neighbours[j]].mass * ((particleVec[i].pressure/pow(particleVec[i].density,2)) + (particleVec[particleVec[i].neighbours[j]].pressure/pow(particleVec[particleVec[i].neighbours[j]].density,2))) * SpikyKernelGradient(diffParticleNeighbour);
         }
         // std::cout << forceSum << std::endl;
-        return forceSum * -1 * pV[i].mass;
+        return forceSum * -1 * particleVec[i].mass;
     }
     void IISPHForces::integration(ParticleVec& particleVec)
     {
+        // #pragma omp parallel for
         for(size_t i=0; i < particleVec.size(); i++)
         {
             particleVec[i].velocity = particleVec[i].predicted_velocity + timestep * compute_pressure_force(particleVec, i)/particleVec[i].mass ;
             // std::cout << particleVec[i].velocity << " Pos: " << particleVec[i].position << std::endl;
+        }
+        for(size_t i=0; i< particleVec.size(); i++)
+        {
             particleVec[i].position += timestep * particleVec[i].velocity;
             // std::cout << particleVec[i].position << std::endl;
         }

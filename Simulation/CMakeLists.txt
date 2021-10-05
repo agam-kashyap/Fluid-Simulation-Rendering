@@ -28,6 +28,9 @@ add_library(
     "${CMAKE_CURRENT_SOURCE_DIR}/include/collisions.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/collisions.cpp"
     )
-target_link_libraries(sim PUBLIC helper)
+
+find_package(glog 0.6.0 REQUIRED)
+
+target_link_libraries(sim PUBLIC helper Log glog::glog)
 
 target_include_directories(sim PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/")

@@ -67,10 +67,19 @@ namespace SPH
         for(size_t i=0u; i < Config::ParticleCount; i++)
         {
             octree.radiusNeighbors<unibn::L2Distance<Particle>>(particles[i], Config::SupportRadius, particles[i].neighbours);
+            // for(size_t j=0; j< particles[i].neighbours.size(); j++)
+            // {
+            //     std::cout <<" " << std::to_string(particles[i].neighbours[j]);
+            // }
+            // std::cout << std::endl;
+            // std::cout << particles[i].neighbours.size() << std::endl;
         }
-        IISPHForces::predict_advection(particles);       
+        IISPHForces::predict_advection(particles); 
+        std::cout <<"Post Advection: " << particles[0].position << " " << std::to_string(particles.size())<< std::endl;      
         IISPHForces::pressureSolve(particles);
+        std::cout <<"Post Pressure: " << particles[0].position << " " << std::to_string(particles.size())<< std::endl;
         IISPHForces::integration(particles);
+        std::cout <<"Post Integration: " << particles[0].position << " " << std::to_string(particles.size())<< std::endl;
         Collision::detectCollisions(particles, SimulationVolume, SimulationObstacle);
         std::cout <<"Post Everything: " << particles[0].position << " " << std::to_string(particles.size())<< std::endl;
     }

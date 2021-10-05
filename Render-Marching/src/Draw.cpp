@@ -119,13 +119,13 @@ void MyDisplay(void)
     const float cubeSize = static_cast<float>(SPH::Config::BoxWidth);
 
     // Draw the obstacle
-    glBegin(GL_TRIANGLES);
-    for (const auto& triangle : mesh)
-    {
-        glColor3f(1.0f / cubeSize, 1.5f * triangle.y / cubeSize, 2.5f * triangle.z / cubeSize);
-        glVertex3f(triangle.x, triangle.y, triangle.z);
-    }
-    glEnd();
+    // glBegin(GL_TRIANGLES);
+    // for (const auto& triangle : mesh)
+    // {
+    //     glColor3f(1.0f / cubeSize, 1.5f * triangle.y / cubeSize, 2.5f * triangle.z / cubeSize);
+    //     glVertex3f(triangle.x, triangle.y, triangle.z);
+    // }
+    // glEnd();
 
     for (auto& particle : sph->particles)
     {
@@ -253,7 +253,8 @@ void processSpecialKeys(int key, int /*xx*/, int /*yy*/)
 void Draw::MainDraw(int argc, char** argv)
 {
     static const std::function<float(float, float, float)> obstacle = Helper::Shapes::Pawn;
-    sph = new SPH::Simulation(&obstacle);
+    // sph = new SPH::Simulation(&obstacle);
+    sph = new SPH::Simulation(nullptr);
 
     mesh = Helper::MarchingCubes::generateMesh(obstacle);
 

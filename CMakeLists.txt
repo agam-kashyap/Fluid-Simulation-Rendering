@@ -7,6 +7,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 include_directories(.)
 
+add_subdirectory(Logger)
 add_subdirectory(SimHelper)
 add_subdirectory(Simulation)
 add_subdirectory(Render-Marching)
