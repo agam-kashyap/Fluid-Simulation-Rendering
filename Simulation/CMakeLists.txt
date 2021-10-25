@@ -18,8 +18,6 @@ add_library(
     "${CMAKE_CURRENT_SOURCE_DIR}/src/sph.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/config.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/config.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/forces.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/forces.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/iisph-forces.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/iisph-forces.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/particle.h"

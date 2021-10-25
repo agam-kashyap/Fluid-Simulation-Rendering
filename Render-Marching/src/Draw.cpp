@@ -24,7 +24,7 @@ static SPH::Simulation* sph;
 
 static Helper::Point3FVector mesh;
 
-void renderSphere(float x, float y, float z, double radius, double velocity, int subdivisions, GLUquadricObj* quadric)
+void renderSphere(float x, float y, float z, double radius, double velocity, double density, int subdivisions, GLUquadricObj* quadric)
 {
     glPushMatrix();
     glTranslatef(x, y, z);
@@ -34,20 +34,26 @@ void renderSphere(float x, float y, float z, double radius, double velocity, int
 
     glColor3f(red, green, blue);
 
+    //color depends on density
+    green = 0.1f;
+    blue = 1.0f;
+    // double r = (density+sph->minDensity)/(sph->maxDensity + sph->minDensity);
+    // red = r;
     // color depends on velocity
-    if (velocity > SPH::Config::SpeedThreshold / 2.)
-    {
-        red = 1.0f;
-    }
-    else if (velocity > SPH::Config::SpeedThreshold / 4.)
-    {
-        red = 0.99f;
-        green = 0.7f;
-    }
-    else
-    {
-        blue = 1.0f;
-    }
+    // if (velocity > SPH::Config::SpeedThreshold / 2.)
+    // {
+    //     blue = 1.0f;
+    // }
+    // else if (velocity > SPH::Config::SpeedThreshold / 4.)
+    // {
+    //     red = 0.1f;
+    //     green = 0.1f;
+    //     blue = 0.5f;
+    // }
+    // else
+    // {
+    //     blue = 0.1f;
+    // }
 
     glColor3f(red, green, blue);
     gluSphere(quadric, radius, subdivisions, subdivisions);
@@ -55,12 +61,12 @@ void renderSphere(float x, float y, float z, double radius, double velocity, int
     glPopMatrix();
 }
 
-void renderSphere_convenient(float x, float y, float z, double radius, double velocity, int subdivisions)
+void renderSphere_convenient(float x, float y, float z, double radius, double velocity, double density, int subdivisions)
 {
     // the same quadric can be re-used for drawing many spheres
     GLUquadricObj* quadric = gluNewQuadric();
     gluQuadricNormals(quadric, GLU_SMOOTH);
-    renderSphere(x, y, z, radius, velocity, subdivisions, quadric);
+    renderSphere(x, y, z, radius, velocity, density, subdivisions, quadric);
     gluDeleteQuadric(quadric);
 }
 
@@ -110,14 +116,18 @@ void MyDisplay(void)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
 
-    glLoadIdentity();
-    gluLookAt(7.0, 8.0, 5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
-    glRotatef(angle, -1, 0, 0);
+    
 
     sph->Run();
 
     const float cubeSize = static_cast<float>(SPH::Config::BoxWidth);
 
+    glLoadIdentity();
+    gluLookAt(3.0, 2.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+    glTranslatef(SPH::Config::BoxWidth/2,SPH::Config::BoxWidth/2,SPH::Config::BoxWidth/2);
+    glRotatef(angle, 0, 0, -1);
+    glTranslatef(-SPH::Config::BoxWidth/2, -SPH::Config::BoxWidth/2, -SPH::Config::BoxWidth/2);
+    
     // Draw the obstacle
     // glBegin(GL_TRIANGLES);
     // for (const auto& triangle : mesh)
@@ -134,7 +144,7 @@ void MyDisplay(void)
         
         renderSphere_convenient(static_cast<float>(particle.position.x), static_cast<float>(particle.position.y),
                                 static_cast<float>(particle.position.z), particle.radius,
-                                particle.velocity.calcNormSqr(), 4);
+                                particle.velocity.calcNormSqr(), particle.density, 4);
     }
 
     glColor3f(1.0, 0.0, 0.0);
@@ -145,11 +155,11 @@ void MyDisplay(void)
     glVertex3f(0.f, 0.f, 0.f);
     glVertex3f(0.f, 0.f, cubeSize);
 
-    glVertex3f(0.f, 0.f, 0.f);
-    glVertex3f(0.f, cubeSize, 0.f);
+    // glVertex3f(0.f, 0.f, 0.f);
+    // glVertex3f(0.f, cubeSize, 0.f);
 
-    glVertex3f(0.f, 0.f, 0.f);
-    glVertex3f(cubeSize, 0.f, 0.f);
+    // glVertex3f(0.f, 0.f, 0.f);
+    // glVertex3f(cubeSize, 0.f, 0.f);
 
     glVertex3f(cubeSize, cubeSize, cubeSize);
     glVertex3f(0.f, cubeSize, cubeSize);
@@ -160,8 +170,8 @@ void MyDisplay(void)
     glVertex3f(cubeSize, cubeSize, cubeSize);
     glVertex3f(cubeSize, cubeSize, 0.f);
 
-    glVertex3f(cubeSize, 0.f, 0.f);
-    glVertex3f(cubeSize, cubeSize, 0.f);
+    // glVertex3f(cubeSize, 0.f, 0.f);
+    // glVertex3f(cubeSize, cubeSize, 0.f);
 
     glVertex3f(0.f, 0.f, cubeSize);
     glVertex3f(cubeSize, 0.f, cubeSize);
@@ -175,7 +185,19 @@ void MyDisplay(void)
     glVertex3f(cubeSize, 0.f, cubeSize);
     glVertex3f(cubeSize, 0.f, 0.f);
 
+    // glVertex3f(0.f, cubeSize, 0.f);
+    // glVertex3f(cubeSize, cubeSize, 0.f);
+    glEnd();
+
+    glBegin(GL_TRIANGLES);
+    glColor3f(0.5f, 0.7f, 0.5f);
+
+    glVertex3f(0.f, 0.f, 0.f);
     glVertex3f(0.f, cubeSize, 0.f);
+    glVertex3f(cubeSize, 0.f, 0.f);
+
+    glVertex3f(0.f, cubeSize, 0.f);
+    glVertex3f(cubeSize, 0.f, 0.f);
     glVertex3f(cubeSize, cubeSize, 0.f);
     glEnd();
 
@@ -237,11 +259,11 @@ void processSpecialKeys(int key, int /*xx*/, int /*yy*/)
     {
         case GLUT_KEY_UP:
             angle -= 0.5;
-            updateGravity();
+            // updateGravity();
             break;
         case GLUT_KEY_DOWN:
             angle += 0.5;
-            updateGravity();
+            // updateGravity();
             break;
         case GLUT_KEY_HOME:
             angle = 360.0;
@@ -289,7 +311,7 @@ void Draw::MainDraw(int argc, char** argv)
     glutTimerFunc(0, timf, 0);
 
     // set up color
-    glClearColor(1., 1., 1., 1.0);
+    glClearColor(0.5, 0.5, 0.75, 0.6);
 
     // enter the GLUT event processing loop
     glutMainLoop();

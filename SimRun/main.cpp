@@ -11,7 +11,7 @@ int main()
 
     // SPH::Simulation* sph = new SPH::Simulation(&obstacle);
     SPH::Simulation* sph = new SPH::Simulation(nullptr);
-    for(int i=0; i< 10; i++)
+    for(int i=0; i< 1; i++)
     {
         std::cout << i << std::endl;
         sph->Run();

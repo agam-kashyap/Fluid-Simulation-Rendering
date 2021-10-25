@@ -54,6 +54,8 @@ namespace SPH
             ParticleVec particles;
         
         public:
+            float minDensity;
+            float maxDensity;
             Helper::Volume SimulationVolume;
             unibn::Octree<Particle> octree;
             unibn::OctreeParams params;

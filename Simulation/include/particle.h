@@ -27,6 +27,7 @@ namespace SPH
             double corrected_density; //sum of rho_adv + extra term in eq 13
             Helper::Point3D sigma_dij; // Sigma dij for all neighbours 
             Helper::Point3D position;
+            Helper::Point3D newposition;
             Helper::Point3D prev_position;
             Helper::Point3D velocity;
             Helper::Point3D predicted_velocity;

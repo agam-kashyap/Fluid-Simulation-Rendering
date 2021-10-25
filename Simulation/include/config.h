@@ -32,6 +32,7 @@ namespace SPH
         static Helper::Point3D GravitationalAcceleration;
 
         static const double SpeedThreshold;
+        static const double timestep;
     };
 }
 #endif
