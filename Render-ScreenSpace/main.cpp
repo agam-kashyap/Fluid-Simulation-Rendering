@@ -73,24 +73,26 @@ int main()
     int particleCount = SPH::Config::ParticleCount;
     glm::vec3 particlePos[particleCount];
 
-    // for(int i=0; i< particleCount; i++)
-    // {
-    //     particlePos[i] = glm::vec3(sph->particles[i]);
-    // }
-    glm::vec3 spherePositions[] = {
-        glm::vec3( 0.0f,  0.0f,  0.0f),
-        glm::vec3( 2.0f,  5.0f, -15.0f),
-        glm::vec3(-1.5f, -2.2f, -2.5f),
-        glm::vec3(-3.8f, -2.0f, -12.3f),
-        glm::vec3( 2.4f, -0.4f, -3.5f),
-        glm::vec3(-1.7f,  3.0f, -7.5f),
-        glm::vec3( 1.3f, -2.0f, -2.5f),
-        glm::vec3( 1.5f,  2.0f, -2.5f),
-        glm::vec3( 1.5f,  0.2f, -1.5f),
-        glm::vec3(-1.3f,  1.0f, -1.5f)
-    };
-
-    Sphere sphere2(1, 36, 18);
+    for(int i=0; i< particleCount; i++)
+    {
+        particlePos[i] = glm::vec3(sph->particles[i].position.x, sph->particles[i].position.y, sph->particles[i].position.z);
+    }
+    // glm::vec3 spherePositions[] = {
+    //     glm::vec3( 0.0f,  0.0f,  0.0f),
+    //     glm::vec3( 2.0f,  5.0f, -15.0f),
+    //     glm::vec3(-1.5f, -2.2f, -2.5f),
+    //     glm::vec3(-3.8f, -2.0f, -12.3f),
+    //     glm::vec3( 2.4f, -0.4f, -3.5f),
+    //     glm::vec3(-1.7f,  3.0f, -7.5f),
+    //     glm::vec3( 1.3f, -2.0f, -2.5f),
+    //     glm::vec3( 1.5f,  2.0f, -2.5f),
+    //     glm::vec3( 1.5f,  0.2f, -1.5f),
+    //     glm::vec3(-1.3f,  1.0f, -1.5f)
+    // };
+    
+    // Render the particles: create single particle
+    // IN final should use particle radius to render 
+    Sphere particle(0.1, 36, 18);
 
     unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
@@ -100,15 +102,15 @@ int main()
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sphere2.getInterleavedVertexSize(), sphere2.getInterleavedVertices(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, particle.getInterleavedVertexSize(), particle.getInterleavedVertices(), GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sphere2.getIndexSize(),sphere2.getIndices(),GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, particle.getIndexSize(),particle.getIndices(),GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     
-    int stride = sphere2.getInterleavedStride(); 
+    int stride = particle.getInterleavedStride(); 
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
     glEnableVertexAttribArray(0);
@@ -124,7 +126,7 @@ int main()
     ourShader.use();
 
 
-    sphere2.printSelf();
+    particle.printSelf();
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -162,17 +164,15 @@ int main()
 
         // render boxes
         glBindVertexArray(VAO);
-        for (unsigned int i = 0; i < 10; i++)
+        for (unsigned int i = 0; i < particleCount; i++)
         {
             // calculate the model matrix for each object and pass it to shader before drawing
             glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-            model = glm::translate(model, spherePositions[i]);
-            float angle = 20.0f * i;
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            model = glm::translate(model, particlePos[i]);
             ourShader.setMat4("model", model);
 
             // glDrawArrays(GL_TRIANGLES, 0, 36);
-            glDrawElements(GL_TRIANGLES, sphere2.getIndexCount(),GL_UNSIGNED_INT,(void*)0); 
+            glDrawElements(GL_TRIANGLES, particle.getIndexCount(),GL_UNSIGNED_INT,(void*)0); 
         }
 
 
