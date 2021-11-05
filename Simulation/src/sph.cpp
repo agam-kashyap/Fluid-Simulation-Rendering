@@ -43,7 +43,7 @@ namespace SPH
                 particles[i].mass = Config::WaterParticleMass ;
                 //-----------------Arranges in a Dam Shaped Structure -------
                 x_pos += 2* Config::ParticleRadius;
-                if(x_pos > 0.25)
+                if(x_pos > 0.35)
                 {
                     if(!X_prev)
                     {
@@ -57,7 +57,7 @@ namespace SPH
                     }
                     y_pos += sqrt(3)*Config::ParticleRadius;
                 }
-                if(y_pos > 0.25)
+                if(y_pos > 0.35)
                 {
                     if(!Z_prev)
                     {

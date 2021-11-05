@@ -14,7 +14,7 @@ namespace SPH
     const double Config::PressureIters = 2;
     const double Config::RelaxationFactor = 0.5;
 
-    const double Config::SupportRadius = 0.4;
+    const double Config::SupportRadius = 0.1;
     const double Config::SmootheningLength = 1.5;
     const double Config::ScalingParam = 0.004;
     //Simulation Constraints

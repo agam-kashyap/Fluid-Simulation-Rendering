@@ -36,8 +36,9 @@ void renderSphere(float x, float y, float z, double radius, double velocity, dou
 
     //color depends on density
     green = 0.1f;
-    blue = 1.0f;
-    // double r = (density+sph->minDensity)/(sph->maxDensity + sph->minDensity);
+    // blue = 1.0f;
+    double r = (density+sph->minDensity)/(sph->maxDensity + sph->minDensity);
+    blue = r;
     // red = r;
     // color depends on velocity
     // if (velocity > SPH::Config::SpeedThreshold / 2.)

@@ -213,22 +213,22 @@ namespace SPH
         {
             /* Particle Collision */
             // std::cout << particleVec[i].neighbours.size() << std::endl;
-            for (size_t j = 0; j < particleVec[i].neighbours.size(); j++)
-            {
-                if(i==particleVec[i].neighbours[j])continue;
-                Helper::Point3D differenceParticleNeighbour =
-                    particleVec[i].position - particleVec[particleVec[i].neighbours[j]].position;
+            // for (size_t j = 0; j < particleVec[i].neighbours.size(); j++)
+            // {
+            //     if(i==particleVec[i].neighbours[j])continue;
+            //     Helper::Point3D differenceParticleNeighbour =
+            //         particleVec[i].position - particleVec[particleVec[i].neighbours[j]].position;
                
-                if (calculateF(differenceParticleNeighbour) < 0)
-                {
-                    const Helper::Point3D surfaceNormal = calculateSurfaceNormal(differenceParticleNeighbour);
+            //     if (calculateF(differenceParticleNeighbour) < 0)
+            //     {
+            //         const Helper::Point3D surfaceNormal = calculateSurfaceNormal(differenceParticleNeighbour);
 
-                    particleVec[i].position = calculateContactPoint(particleVec[i].position, differenceParticleNeighbour);
-                    particleVec[i].velocity = calculateVelocity(particleVec[i].velocity, surfaceNormal);
-                    if(std::isnan(particleVec[i].velocity.x) || std::isnan(particleVec[i].velocity.y) || std::isnan(particleVec[i].velocity.z))std::cout << " ii -> " << i<< " " << particleVec[i].neighbours.size();
+            //         particleVec[i].position = calculateContactPoint(particleVec[i].position, differenceParticleNeighbour);
+            //         particleVec[i].velocity = calculateVelocity(particleVec[i].velocity, surfaceNormal);
+            //         if(std::isnan(particleVec[i].velocity.x) || std::isnan(particleVec[i].velocity.y) || std::isnan(particleVec[i].velocity.z))std::cout << " ii -> " << i<< " " << particleVec[i].neighbours.size();
 
-                }
-            }
+            //     }
+            // }
 
             const Helper::Cuboid cuboid = volume.getBBox();
 
