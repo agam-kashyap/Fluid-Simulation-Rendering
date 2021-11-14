@@ -9,7 +9,6 @@ Ensure that you run the executable from the build/bin directory. Shader paths ar
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 
 // settings
@@ -21,10 +20,13 @@ Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
+
 static bool lbutton_down = false;
+double mouseX_init = 0;
+double mouseY_init = 0;
 
 //Light
-glm::vec3 lightPos = glm::vec3(1.0f, 20.0f, -40.0f);
+glm::vec3 lightPos = glm::vec3(1.0f, 20.0f, 40.0f);
 
 // timing
 float deltaTime = 0.0f;	// time between current frame and last frame
@@ -59,9 +61,8 @@ int main()
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    glfwSetCursorPosCallback(window, mouse_callback); //This function moves the camera based on the cursor position
+    // glfwSetCursorPosCallback(window, mouse_callback); //This function moves the camera based on the cursor position
     glfwSetMouseButtonCallback(window, mouse_button_callback); //This function moves the camera based on the mouse drag
-    glfwSetScrollCallback(window, scroll_callback);
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
@@ -122,6 +123,24 @@ int main()
         // input
         // -----
         processInput(window);
+        if(lbutton_down)
+        {
+            std::cout << "LBUTTON DOWN" << std::endl;
+            // Grab the current location of the mouse and find the delta between it and the last
+            double m_x, m_y;
+            glfwGetCursorPos(window, &m_x, &m_y);
+            double mouseX_move = m_x - mouseX_init;
+            double mouseY_move = m_y - mouseY_init;
+            
+            mouseX_init = m_x;
+            mouseY_init = m_y;
+
+            camera.ProcessMouseButtonMovement(mouseX_move, mouseY_move, SCR_WIDTH, SCR_HEIGHT);
+        }
+        else
+        {
+            glfwGetCursorPos(window, &mouseX_init, &mouseY_init);
+        }
 
         // render
         // ------
@@ -220,13 +239,6 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
-// glfw: whenever the mouse scroll wheel scrolls, this callback is called
-// ----------------------------------------------------------------------
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
-    camera.ProcessMouseScroll(yoffset);
-}
-
 static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
     if (button == GLFW_MOUSE_BUTTON_LEFT)
@@ -240,8 +252,6 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
             lbutton_down = false;
         }
     }
-    if(lbutton_down)
-    {
-        
-    }
+    std::cout << "In Mouse Callback" << std::endl;
+    
 }

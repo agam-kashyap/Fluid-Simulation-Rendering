@@ -21,7 +21,7 @@ const float PITCH       =  0.0f;
 const float SPEED       =  2.5f;
 const float SENSITIVITY =  0.1f;
 const float ZOOM        =  45.0f;
-
+const float ROTSPEED = 20.0f;
 
 // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
 class Camera
@@ -40,9 +40,16 @@ public:
     float MovementSpeed;
     float MouseSensitivity;
     float Zoom;
+    float RotationSpeed;
 
     // constructor with vectors
-    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
+    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) 
+    : 
+    Front(glm::vec3(0.0f, 0.0f, -1.0f)), 
+    MovementSpeed(SPEED), 
+    MouseSensitivity(SENSITIVITY), 
+    Zoom(ZOOM), 
+    RotationSpeed(ROTSPEED)
     {
         Position = position;
         WorldUp = up;
@@ -51,7 +58,12 @@ public:
         updateCameraVectors();
     }
     // constructor with scalar values
-    Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
+    Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch): 
+    Front(glm::vec3(0.0f, 0.0f, -1.0f)), 
+    MovementSpeed(SPEED), 
+    MouseSensitivity(SENSITIVITY), 
+    Zoom(ZOOM), 
+    RotationSpeed(ROTSPEED)
     {
         Position = glm::vec3(posX, posY, posZ);
         WorldUp = glm::vec3(upX, upY, upZ);
@@ -100,6 +112,22 @@ public:
         }
 
         // update Front, Right and Up Vectors using the updated Euler angles
+        updateCameraVectors();
+    }
+
+    void ProcessMouseButtonMovement(float mouseX_move, float mouseY_move, float SCR_WIDTH, float SCR_HEIGHT, GLboolean constrainPitch = true)
+    {
+        Pitch += mouseY_move / SCR_HEIGHT * RotationSpeed;
+        Yaw -= mouseX_move / SCR_WIDTH * RotationSpeed;
+
+        if (constrainPitch)
+        {
+            if (Pitch > 89.0f)
+                Pitch = 89.0f;
+            if (Pitch < -89.0f)
+                Pitch = -89.0f;
+        }
+
         updateCameraVectors();
     }
 
