@@ -1,3 +1,6 @@
+/*
+Ensure that you run the executable from the build/bin directory. Shader paths are not updated dynamically despite being relative.
+*/
 #include "./include/render.h"
 
 #include <config.h>
@@ -5,6 +8,7 @@
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 
@@ -17,6 +21,7 @@ Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
+static bool lbutton_down = false;
 
 // timing
 float deltaTime = 0.0f;	// time between current frame and last frame
@@ -49,7 +54,8 @@ int main()
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetCursorPosCallback(window, mouse_callback); //This function moves the camera based on the cursor position
+    glfwSetMouseButtonCallback(window, mouse_button_callback); //This function moves the camera based on the mouse drag
     glfwSetScrollCallback(window, scroll_callback);
 
     // glad: load all OpenGL function pointers
@@ -62,71 +68,65 @@ int main()
 
     // configure global opengl state
     // -----------------------------
-    glEnable(GL_DEPTH_TEST);
+    // glEnable(GL_DEPTH_TEST);
 
     // build and compile our shader zprogram
     // ------------------------------------
-    Shader ourShader("/home/sassluck/Desktop/7th Semester/Advanced Computer Graphics/Simulation/code/Render-ScreenSpace/shader/fluid.vert", "/home/sassluck/Desktop/7th Semester/Advanced Computer Graphics/Simulation/code/Render-ScreenSpace/shader/fluid.frag");
+    Shader ourShader("../../Render-ScreenSpace/shader/fluid.vert", "../../Render-ScreenSpace/shader/fluid.frag");
+    Shader depthShader("../../Render-ScreenSpace/shader/sprite.vert","../../Render-ScreenSpace/shader/sprite.frag");
 
     // Initialise the SPH simulation
     sph = new SPH::Simulation(nullptr);
     int particleCount = SPH::Config::ParticleCount;
+    float particleRadius = SPH::Config::ParticleRadius;
+
     glm::vec3 particlePos[particleCount];
 
     for(int i=0; i< particleCount; i++)
     {
         particlePos[i] = glm::vec3(sph->particles[i].position.x, sph->particles[i].position.y, sph->particles[i].position.z);
     }
-    // glm::vec3 spherePositions[] = {
-    //     glm::vec3( 0.0f,  0.0f,  0.0f),
-    //     glm::vec3( 2.0f,  5.0f, -15.0f),
-    //     glm::vec3(-1.5f, -2.2f, -2.5f),
-    //     glm::vec3(-3.8f, -2.0f, -12.3f),
-    //     glm::vec3( 2.4f, -0.4f, -3.5f),
-    //     glm::vec3(-1.7f,  3.0f, -7.5f),
-    //     glm::vec3( 1.3f, -2.0f, -2.5f),
-    //     glm::vec3( 1.5f,  2.0f, -2.5f),
-    //     glm::vec3( 1.5f,  0.2f, -1.5f),
-    //     glm::vec3(-1.3f,  1.0f, -1.5f)
-    // };
     
     // Render the particles: create single particle
     // IN final should use particle radius to render 
-    Sphere particle(0.1, 36, 18);
+    std::cout << particleRadius << std::endl;
+    // Sphere particle(particleRadius, 30, 18);
 
-    unsigned int VBO, VAO, EBO;
+    // vertices array determines the corners of a Quad. 
+    // TexCoordinates are needed to be passed since gl_PointCoord doesn't work(not sure why)
+    float vertices[] = { 
+        // pos      // tex
+        -1.0f,  1.0f, -1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,  1.0f,
+         1.0f, -1.0f,  1.0f, -1.0f,
+
+         -1.0f,  1.0f, -1.0f,  1.0f,
+          1.0f, -1.0f,  1.0f, -1.0f,
+         -1.0f, -1.0f, -1.0f, -1.0f 
+    };
+
+    unsigned int VBO, VAO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
 
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, particle.getInterleavedVertexSize(), particle.getInterleavedVertices(), GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, particle.getIndexSize(),particle.getIndices(),GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    
-    int stride = particle.getInterleavedStride(); 
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
+
+    //position attribute
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
-    // normal attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
+    //tex attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
     glEnableVertexAttribArray(1);
-    // texture coord attribute
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
     
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
     // -------------------------------------------------------------------------------------------
     ourShader.use();
 
-
-    particle.printSelf();
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -146,33 +146,31 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 
-        // activate shader
-        ourShader.use();
+        //Sprite Shader to render the spheres
+        depthShader.use();
 
-        ourShader.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-        ourShader.setVec3("lightPos", camera.Position);
-        ourShader.setVec3("objectColor", glm::vec3(1.0, 0.3, 0.5));
-        ourShader.setVec3("viewPos", camera.Position);
+        // depthShader.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+        // depthShader.setVec3("lightPos", camera.Position);
+        // depthShader.setVec3("objectColor", glm::vec3(1.0, 0.3, 0.5));
+        // depthShader.setVec3("viewPos", camera.Position);
 
-        // pass projection matrix to shader (note that in this case it could change every frame)
+
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        ourShader.setMat4("projection", projection);
+        depthShader.setMat4("projection", projection);
 
-        // camera/view transformation
         glm::mat4 view = camera.GetViewMatrix();
-        ourShader.setMat4("view", view);
+        depthShader.setMat4("view", view);
 
-        // render boxes
         glBindVertexArray(VAO);
         for (unsigned int i = 0; i < particleCount; i++)
         {
             // calculate the model matrix for each object and pass it to shader before drawing
             glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
             model = glm::translate(model, particlePos[i]);
-            ourShader.setMat4("model", model);
+            model = glm::scale(model, glm::vec3(0.05, 0.05, 0.05));
+            depthShader.setMat4("model", model);
 
-            // glDrawArrays(GL_TRIANGLES, 0, 36);
-            glDrawElements(GL_TRIANGLES, particle.getIndexCount(),GL_UNSIGNED_INT,(void*)0); 
+            glDrawArrays(GL_TRIANGLES, 0, 6);
         }
 
 
@@ -243,4 +241,23 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     camera.ProcessMouseScroll(yoffset);
+}
+
+static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+    if (button == GLFW_MOUSE_BUTTON_LEFT)
+    {
+        if(action == GLFW_PRESS)
+        {
+            lbutton_down = true;
+        }
+        else if (action == GLFW_RELEASE)
+        {
+            lbutton_down = false;
+        }
+    }
+    if(lbutton_down)
+    {
+        
+    }
 }
