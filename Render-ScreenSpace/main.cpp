@@ -23,12 +23,17 @@ float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 static bool lbutton_down = false;
 
+//Light
+glm::vec3 lightPos = glm::vec3(1.0f, 20.0f, -40.0f);
+
 // timing
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
 // SPH simulation
 static SPH::Simulation* sph;
+float scalingFactor = 1;
+
 
 int main()
 {
@@ -66,19 +71,15 @@ int main()
         return -1;
     }
 
-    // configure global opengl state
-    // -----------------------------
-    // glEnable(GL_DEPTH_TEST);
-
     // build and compile our shader zprogram
     // ------------------------------------
-    Shader ourShader("../../Render-ScreenSpace/shader/fluid.vert", "../../Render-ScreenSpace/shader/fluid.frag");
     Shader depthShader("../../Render-ScreenSpace/shader/sprite.vert","../../Render-ScreenSpace/shader/sprite.frag");
 
     // Initialise the SPH simulation
     sph = new SPH::Simulation(nullptr);
     int particleCount = SPH::Config::ParticleCount;
     float particleRadius = SPH::Config::ParticleRadius;
+    scalingFactor = 2; //Ideally set to a value such that the resultant pointsize is more than 4.
 
     glm::vec3 particlePos[particleCount];
 
@@ -86,23 +87,9 @@ int main()
     {
         particlePos[i] = glm::vec3(sph->particles[i].position.x, sph->particles[i].position.y, sph->particles[i].position.z);
     }
-    
-    // Render the particles: create single particle
-    // IN final should use particle radius to render 
-    std::cout << particleRadius << std::endl;
-    // Sphere particle(particleRadius, 30, 18);
 
-    // vertices array determines the corners of a Quad. 
-    // TexCoordinates are needed to be passed since gl_PointCoord doesn't work(not sure why)
-    float vertices[] = { 
-        // pos      // tex
-        -1.0f,  1.0f, -1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,  1.0f,
-         1.0f, -1.0f,  1.0f, -1.0f,
-
-         -1.0f,  1.0f, -1.0f,  1.0f,
-          1.0f, -1.0f,  1.0f, -1.0f,
-         -1.0f, -1.0f, -1.0f, -1.0f 
+    float vertices[] = {
+        0.0f, 0.0f, 0.0f
     };
 
     unsigned int VBO, VAO;
@@ -117,15 +104,10 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
     //position attribute
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
-    //tex attribute
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
-    glEnableVertexAttribArray(1);
     
-    // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
-    // -------------------------------------------------------------------------------------------
-    ourShader.use();
+    glEnable(GL_PROGRAM_POINT_SIZE);
 
     // render loop
     // -----------
@@ -149,11 +131,13 @@ int main()
         //Sprite Shader to render the spheres
         depthShader.use();
 
-        // depthShader.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-        // depthShader.setVec3("lightPos", camera.Position);
-        // depthShader.setVec3("objectColor", glm::vec3(1.0, 0.3, 0.5));
-        // depthShader.setVec3("viewPos", camera.Position);
+        depthShader.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+        depthShader.setVec3("lightPos", lightPos);
+        depthShader.setVec3("particleColor", glm::vec3(0.0, 0.3, 1.0));
+        depthShader.setVec3("cameraViewPos", camera.Position);
 
+        depthShader.setFloat("heightOfNearPlane", (float)SCR_HEIGHT * (1.0f / tanf(camera.Zoom * 0.5f)) );
+        depthShader.setFloat("particleRadius", scalingFactor*particleRadius);
 
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         depthShader.setMat4("projection", projection);
@@ -170,7 +154,7 @@ int main()
             model = glm::scale(model, glm::vec3(0.05, 0.05, 0.05));
             depthShader.setMat4("model", model);
 
-            glDrawArrays(GL_TRIANGLES, 0, 6);
+            glDrawArrays(GL_POINTS, 0, 1);
         }
 
 
