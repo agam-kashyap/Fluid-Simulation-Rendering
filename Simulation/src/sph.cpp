@@ -41,39 +41,51 @@ namespace SPH
                 particles[i] = Helper::Point3D(x_pos, y_pos, z_pos);
                 particles[i].velocity = Config::InitVelocity;
                 particles[i].mass = Config::WaterParticleMass ;
-                //-----------------Arranges in a Dam Shaped Structure -------
+                //-----------------Arranges in a Honey Comb Shaped Structure -------
+                // x_pos += 2* Config::ParticleRadius;
+                // if(x_pos > 1.0)
+                // {
+                //     if(!X_prev)
+                //     {
+                //         X_prev = 1;
+                //         x_pos = 2*Config::ParticleRadius;
+                //     }
+                //     else
+                //     {
+                //         X_prev = 0;
+                //         x_pos = Config::ParticleRadius;
+                //     }
+                //     y_pos += sqrt(3)*Config::ParticleRadius;
+                // }
+                // if(y_pos > 1.0)
+                // {
+                //     if(!Z_prev)
+                //     {
+                //         Z_prev = 1;
+                //         X_prev = 1;
+                //         x_pos = 2*Config::ParticleRadius;
+                //         y_pos = Config::ParticleRadius*(1 + sqrt(3)/2);
+                //     }
+                //     else
+                //     {
+                //         Z_prev = 0;
+                //         X_prev = 0;
+                //         x_pos = Config::ParticleRadius;
+                //         y_pos = Config::ParticleRadius; 
+                //     }
+                //     z_pos += 1.5*Config::ParticleRadius;
+                // }
+                //----------------Arranges in Dam shape--------
                 x_pos += 2* Config::ParticleRadius;
-                if(x_pos > 0.35)
+                if(x_pos > 1.0)
                 {
-                    if(!X_prev)
-                    {
-                        X_prev = 1;
-                        x_pos = 2*Config::ParticleRadius;
-                    }
-                    else
-                    {
-                        X_prev = 0;
-                        x_pos = Config::ParticleRadius;
-                    }
-                    y_pos += sqrt(3)*Config::ParticleRadius;
+                    x_pos = Config::ParticleRadius ;//+ 1.5;
+                    y_pos += 2*Config::ParticleRadius;
                 }
-                if(y_pos > 0.35)
+                if(y_pos > 1.0)
                 {
-                    if(!Z_prev)
-                    {
-                        Z_prev = 1;
-                        X_prev = 1;
-                        x_pos = 2*Config::ParticleRadius;
-                        y_pos = Config::ParticleRadius*(1 + sqrt(3)/2);
-                    }
-                    else
-                    {
-                        Z_prev = 0;
-                        X_prev = 0;
-                        x_pos = Config::ParticleRadius;
-                        y_pos = Config::ParticleRadius; 
-                    }
-                    z_pos += 1.5*Config::ParticleRadius;
+                    y_pos = Config::ParticleRadius ;//+ 1.5;
+                    z_pos += 2*Config::ParticleRadius;
                 }
             }
             params.copyPoints = true;

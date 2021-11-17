@@ -2,7 +2,7 @@
 
 namespace SPH
 {
-    const size_t Config::ParticleCount = 1000;
+    const size_t Config::ParticleCount = 8000;
     const double Config::ParticleRadius = 0.015;
     const double Config::Elasticity = 0.4;
     const Helper::Point3D Config::InitVelocity (0.0,0.0,0.0);
@@ -18,9 +18,9 @@ namespace SPH
     const double Config::SmootheningLength = 1.5;
     const double Config::ScalingParam = 0.004;
     //Simulation Constraints
-    const double Config::BoxWidth = 0.8;
-    const double Config::BoxHeight = 0.8;
-    const double Config::BoxDepth = 0.8;
+    const double Config::BoxWidth = 3.0;
+    const double Config::BoxHeight = 3.0;
+    const double Config::BoxDepth = 3.0;
     const Helper::Point3D Config::InitGravitationalAcceleration(0.0, 0.0, -9.82);
     Helper::Point3D Config::GravitationalAcceleration(0.0, 0.0, -9.82);
 

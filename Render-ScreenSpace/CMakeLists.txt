@@ -5,6 +5,8 @@ file(GLOB RENDER_FILES
 "${CMAKE_CURRENT_SOURCE_DIR}/include/sphere.h"
 "${CMAKE_CURRENT_SOURCE_DIR}/src/shader.cpp"
 "${CMAKE_CURRENT_SOURCE_DIR}/src/sphere.cpp"
+"${CMAKE_CURRENT_SOURCE_DIR}/include/stb_image.h"
+"${CMAKE_CURRENT_SOURCE_DIR}/src/stb_image.c"
 )
 
 add_executable(ACG main.cpp ${RENDER_FILES} ${SIMULATION_FILES} ${SIMHELPER_FILES})
