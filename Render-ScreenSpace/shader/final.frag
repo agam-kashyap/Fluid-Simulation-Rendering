@@ -30,81 +30,79 @@ void main() {
 	vec4 scene = texture(sceneMap, coord);
     float depth = texture(depthMap, coord).x;
 
-	fragColor = vec4(0.0, depth, 0.0, 1.0);
+	if (depth == 0.0f) {
+		fragColor = vec4(0);
+		return;
+	}
 
-	// if (depth == 0.0f) {
-	// 	fragColor = vec4(0);
-	// 	return;
-	// }
+	if (depth == 1.0) {
+		fragColor = scene;
+		return;
+	}
 
-	// if (depth == 1.0) {
-	// 	fragColor = scene;
-	// 	return;
-	// }
+	// reconstruct eye space pos from depth
+	vec3 eyePos = uvToEye(coord, depth);
 
-	// // reconstruct eye space pos from depth
-	// vec3 eyePos = uvToEye(coord, depth);
-
-	// // finite difference approx for normals, can't take dFdx because
-	// // the one-sided difference is incorrect at shape boundaries
-	// vec3 zl = eyePos - uvToEye(coord - vec2(invTexScale.x, 0.0), texture(depthMap, coord - vec2(invTexScale.x, 0.0)).x);
-	// vec3 zr = uvToEye(coord + vec2(invTexScale.x, 0.0), texture(depthMap, coord + vec2(invTexScale.x, 0.0)).x) - eyePos;
-	// vec3 zt = uvToEye(coord + vec2(0.0, invTexScale.y), texture(depthMap, coord + vec2(0.0, invTexScale.y)).x) - eyePos;
-	// vec3 zb = eyePos - uvToEye(coord - vec2(0.0, invTexScale.y), texture(depthMap, coord - vec2(0.0, invTexScale.y)).x);
+	// finite difference approx for normals, can't take dFdx because
+	// the one-sided difference is incorrect at shape boundaries
+	vec3 zl = eyePos - uvToEye(coord - vec2(invTexScale.x, 0.0), texture(depthMap, coord - vec2(invTexScale.x, 0.0)).x);
+	vec3 zr = uvToEye(coord + vec2(invTexScale.x, 0.0), texture(depthMap, coord + vec2(invTexScale.x, 0.0)).x) - eyePos;
+	vec3 zt = uvToEye(coord + vec2(0.0, invTexScale.y), texture(depthMap, coord + vec2(0.0, invTexScale.y)).x) - eyePos;
+	vec3 zb = eyePos - uvToEye(coord - vec2(0.0, invTexScale.y), texture(depthMap, coord - vec2(0.0, invTexScale.y)).x);
 	
-	// vec3 dx = zl;
-	// vec3 dy = zt;
+	vec3 dx = zl;
+	vec3 dy = zt;
 
-	// if (abs(zr.z) < abs(zl.z))
-	// 	dx = zr;
+	if (abs(zr.z) < abs(zl.z))
+		dx = zr;
 
-	// if (abs(zb.z) < abs(zt.z))
-	// 	dy = zb;
+	if (abs(zb.z) < abs(zt.z))
+		dy = zb;
 
-	// vec3 normal = normalize(cross(dx, dy));
+	vec3 normal = normalize(cross(dx, dy));
     
-	// vec4 worldPos = inverse(mView) * vec4(eyePos, 1.0);
+	vec4 worldPos = inverse(mView) * vec4(eyePos, 1.0);
     
-    // //Phong specular
-	// vec3 l = (mView * vec4(lightDir, 0.0)).xyz;
-    // vec3 viewDir = -normalize(eyePos);
-    // vec3 halfVec = normalize(viewDir + l);
-    // float specular = pow(max(0.0f, dot(normal, halfVec)), shininess);	
+    //Phong specular
+	vec3 l = (mView * vec4(lightDir, 0.0)).xyz;
+    vec3 viewDir = -normalize(eyePos);
+    vec3 halfVec = normalize(viewDir + l);
+    float specular = pow(max(0.0f, dot(normal, halfVec)), shininess);	
 
-	// vec2 texScale = vec2(0.75, 1.0);
-	// float refractScale = 1.33 * 0.025;
-	// refractScale *= smoothstep(0.1, 0.4, worldPos.y);
-	// vec2 refractCoord = coord + normal.xy*refractScale*texScale;
+	vec2 texScale = vec2(0.75, 1.0);
+	float refractScale = 1.33 * 0.025;
+	refractScale *= smoothstep(0.1, 0.4, worldPos.y);
+	vec2 refractCoord = coord + normal.xy*refractScale*texScale;
 
-	// float thickness = max(texture(thicknessMap, coord).x, 0.3);
-	// vec3 transmission = exp(-(vec3(1.0)-color.xyz)*thickness);
+	float thickness = max(texture(thicknessMap, coord).x, 0.3);
+	vec3 transmission = exp(-(vec3(1.0)-color.xyz)*thickness);
 
-	// vec3 refract = texture(sceneMap, refractCoord).xyz*transmission;
+	vec3 refract = texture(sceneMap, refractCoord).xyz*transmission;
     
-	// vec3 lVec = normalize(worldPos.xyz-lightPos);
-	// float attenuation = max(smoothstep(0.95, 1.0, abs(dot(lVec, -lightDir))), 0.05);
+	vec3 lVec = normalize(worldPos.xyz-lightPos);
+	float attenuation = max(smoothstep(0.95, 1.0, abs(dot(lVec, -lightDir))), 0.05);
 
-	// float ln = dot(l, normal)*attenuation;
+	float ln = dot(l, normal)*attenuation;
 
-    // //Fresnel
-    // float fresnel = fresBias + fresScale * pow(1.0f - max(dot(normal, viewDir), 0.0), fresPower);
+    //Fresnel
+    float fresnel = fresBias + fresScale * pow(1.0f - max(dot(normal, viewDir), 0.0), fresPower);
 
-	// //Diffuse light
-	// vec3 diffuse = color.xyz * mix(vec3(0.29, 0.379, 0.59), vec3(1.0), (ln*0.5 + 0.5)) * (1 - color.w);
+	//Diffuse light
+	vec3 diffuse = color.xyz * mix(vec3(0.29, 0.379, 0.59), vec3(1.0), (ln*0.5 + 0.5)) * (1 - color.w);
 
-	// vec3 skyColor = vec3(0.1, 0.2, 0.4)*1.2;
-	// vec3 groundColor = vec3(0.1, 0.1, 0.2);
+	vec3 skyColor = vec3(0.1, 0.2, 0.4)*1.2;
+	vec3 groundColor = vec3(0.1, 0.1, 0.2);
 
-	// vec3 rEye = reflect(viewDir, normal).xyz;
-	// vec3 rWorld = (inverse(mView)*vec4(rEye, 0.0)).xyz;
+	vec3 rEye = reflect(viewDir, normal).xyz;
+	vec3 rWorld = (inverse(mView)*vec4(rEye, 0.0)).xyz;
 
-	// vec3 reflect = vec3(1.0) + mix(groundColor, skyColor, smoothstep(0.15, 0.25, rWorld.y));
+	vec3 reflect = vec3(1.0) + mix(groundColor, skyColor, smoothstep(0.15, 0.25, rWorld.y));
     
-    // //Compositing everything
-    // // vec3 finalColor = diffuse + (mix(refract, reflect, fresnel) + specular) * color.w;
+    //Compositing everything
+    vec3 finalColor = diffuse + (mix(refract, reflect, fresnel) + specular) * color.w;
 	// vec3 finalColor = diffuse;
-	// // fragColor = vec4(finalColor, 1.0);
+	fragColor = vec4(finalColor, 1.0);
 
-	// fragColor = vec4(0.0,1.0,0.4,1.0);
+	// fragColor = vec4(vec3(depth),1.0);
 	gl_FragDepth = depth;
 }

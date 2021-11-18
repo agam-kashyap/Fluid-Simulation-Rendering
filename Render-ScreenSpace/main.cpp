@@ -421,86 +421,86 @@ int main()
         blurShader.setFloat("blurScale", 0.1f);
 
         glEnable(GL_DEPTH_TEST);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);  //THis enables the buffer for drawing
+        // glBindFramebuffer(GL_FRAMEBUFFER, 0);  //THis enables the buffer for drawing
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glDisable(GL_DEPTH_TEST);
 
-        // //------------------------------THICKNESS OF FLUID PROGRAM-------------------------------------
-        // thicknessShader.use();
-        // glBindFramebuffer(GL_FRAMEBUFFER, thickFBO);
-        // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        //------------------------------THICKNESS OF FLUID PROGRAM-------------------------------------
+        thicknessShader.use();
+        glBindFramebuffer(GL_FRAMEBUFFER, thickFBO);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // glBindVertexArray(depthVAO);
+        glBindVertexArray(depthVAO);
     
-        // thicknessShader.setFloat("pointScale", (float)SCR_HEIGHT * (1.0f / tanf(camera.Zoom * 0.5f)) );
-        // thicknessShader.setFloat("pointRadius", scalingFactor*particleRadius);
+        thicknessShader.setFloat("pointScale", (float)SCR_HEIGHT * (1.0f / tanf(camera.Zoom * 0.5f)) );
+        thicknessShader.setFloat("pointRadius", scalingFactor*particleRadius);
 
-        // depthShader.setMat4("projection", projection);
-        // depthShader.setMat4("view", view);
-
-        // // glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        // glEnable(GL_BLEND);
-        // glBlendFunc(GL_ONE, GL_ONE);
-        // glBlendEquation(GL_FUNC_ADD);
-        // glDepthMask(GL_FALSE);
-        // glEnable(GL_PROGRAM_POINT_SIZE);
-
-        // for (unsigned int i = 0; i < particleCount; i++)
-        // {
-        //     // calculate the model matrix for each object and pass it to shader before drawing
-        //     glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-        //     model = glm::translate(model, particlePos[i]);
-        //     // model = glm::scale(model, glm::vec3(0.05, 0.05, 0.05));
-        //     thicknessShader.setMat4("model", model);
-
-        //     glDrawArrays(GL_POINTS, 0, 1);
-        // }
-        // glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
-        // glDisable(GL_DEPTH_TEST);
-        // glDisable(GL_BLEND);
-
-        // // //------------------------------COMPILATION OF ALL STEPS----------------------------------------
-        // finalShader.use();
-        // glBindFramebuffer(GL_FRAMEBUFFER, finalFBO);
-
-        // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		// glBindVertexArray(finalVAO);
-		
-		// glBindBuffer(GL_ARRAY_BUFFER, finalVBO);
-		// glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-		// glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, finalEBO);
-		// glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-		// glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
-		// glEnableVertexAttribArray(0);
-
-        // glActiveTexture(GL_TEXTURE0);
-        // glBindTexture(GL_TEXTURE_2D, blurTex_h);
-        // depthMAP = glGetUniformLocation(finalShader.ID, "depthMap");
-        // glUniform1i(depthMAP, 0);
-
-        // glActiveTexture(GL_TEXTURE1);
-        // glBindTexture(GL_TEXTURE_2D, thickTex);
-        // GLint thicknessMap = glGetUniformLocation(finalShader.ID, "thicknessMap");
-        // glUniform1i(thicknessMap, 1);
-
-        // // glActiveTexture(GL_TEXTURE2);
-        // // glBindTexture(GL_TEXTURE_2D, plane.tex);
-        // // GLint sceneMap = glGetUniformLocation(fluidFinal.program, "sceneMap");
-        // // glUniform1i(sceneMap, 2);
-
-        // finalShader.setMat4("projection", projection);
-        // finalShader.setMat4("mView", view);
-        // finalShader.setVec2("invTexScale", glm::vec2(1.0f/SCR_WIDTH, 1.0f/SCR_HEIGHT));
-        // finalShader.setVec4("color", color);
+        depthShader.setMat4("projection", projection);
+        depthShader.setMat4("view", view);
 
         // glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        // glEnable(GL_DEPTH_TEST);
-        // glDepthMask(GL_TRUE);
-        // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        // glDisable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ONE, GL_ONE);
+        glBlendEquation(GL_FUNC_ADD);
+        glDepthMask(GL_FALSE);
+        glEnable(GL_PROGRAM_POINT_SIZE);
+
+        for (unsigned int i = 0; i < particleCount; i++)
+        {
+            // calculate the model matrix for each object and pass it to shader before drawing
+            glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+            model = glm::translate(model, particlePos[i]);
+            // model = glm::scale(model, glm::vec3(0.05, 0.05, 0.05));
+            thicknessShader.setMat4("model", model);
+
+            glDrawArrays(GL_POINTS, 0, 1);
+        }
+        glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_BLEND);
+
+        // //------------------------------COMPILATION OF ALL STEPS----------------------------------------
+        finalShader.use();
+        glBindFramebuffer(GL_FRAMEBUFFER, finalFBO);
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glBindVertexArray(finalVAO);
+		
+		glBindBuffer(GL_ARRAY_BUFFER, finalVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, finalEBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
+		glEnableVertexAttribArray(0);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, blurTex_h);
+        depthMAP = glGetUniformLocation(finalShader.ID, "depthMap");
+        glUniform1i(depthMAP, 0);
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, thickTex);
+        GLint thicknessMap = glGetUniformLocation(finalShader.ID, "thicknessMap");
+        glUniform1i(thicknessMap, 1);
+
+        // glActiveTexture(GL_TEXTURE2);
+        // glBindTexture(GL_TEXTURE_2D, plane.tex);
+        GLint sceneMap = glGetUniformLocation(finalShader.ID, "sceneMap");
+        glUniform1i(sceneMap, 2);
+
+        finalShader.setMat4("projection", projection);
+        finalShader.setMat4("mView", view);
+        finalShader.setVec2("invTexScale", glm::vec2(1.0f/SCR_WIDTH, 1.0f/SCR_HEIGHT));
+        finalShader.setVec4("color", color);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_TRUE);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDisable(GL_DEPTH_TEST);
 
         //-----------------------DRAW SKYBOX at last (ENable and Disable the Depth test)----------------
         // glEnable(GL_DEPTH_TEST);
