@@ -392,7 +392,6 @@ int main()
         blurShader.setFloat("blurScale", 0.1f);
 
         glEnable(GL_DEPTH_TEST);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     
         // // Horizontal Blur
@@ -422,7 +421,7 @@ int main()
         blurShader.setFloat("blurScale", 0.1f);
 
         glEnable(GL_DEPTH_TEST);
-        // glBindFramebuffer(GL_FRAMEBUFFER, 0);  //THis enables the buffer for drawing
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);  //THis enables the buffer for drawing
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glDisable(GL_DEPTH_TEST);
 
