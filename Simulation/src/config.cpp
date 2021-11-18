@@ -2,7 +2,7 @@
 
 namespace SPH
 {
-    const size_t Config::ParticleCount = 8000;
+    const size_t Config::ParticleCount = 80000;
     const double Config::ParticleRadius = 0.015;
     const double Config::Elasticity = 0.4;
     const Helper::Point3D Config::InitVelocity (0.0,0.0,0.0);

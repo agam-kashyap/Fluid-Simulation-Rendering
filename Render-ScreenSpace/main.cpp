@@ -25,11 +25,11 @@ const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 static const glm::vec2 blurDirX = glm::vec2(1.0f / SCR_WIDTH, 0.0f);
 static const glm::vec2 blurDirY = glm::vec2(0.0f, 1.0f / SCR_HEIGHT);
-static float filterRadius = 3;
+static float filterRadius = 300;
 static const glm::vec4 color = glm::vec4(.275f, 0.65f, 0.85f, 0.9f);
 
 // camera
-Camera camera(glm::vec3(0.0f, 3.0f, 3.0f));
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -39,7 +39,7 @@ double mouseX_init = 0;
 double mouseY_init = 0;
 
 //Light
-glm::vec3 lightPos = glm::vec3(1.0f, 20.0f, 40.0f);
+glm::vec3 lightPos = glm::vec3(1.0f, 5.0f, 35.0f);
 
 // timing
 float deltaTime = 0.0f;	// time between current frame and last frame
@@ -184,83 +184,90 @@ int main()
     glEnableVertexAttribArray(0);
     
     // //--------------------------BLUR SHADER PROGRAM-------------------------------
-    // Shader blurShader("../../Render-ScreenSpace/shader/blur.vert","../../Render-ScreenSpace/shader/blur.frag");
-    // unsigned int blurFBO_v, blurFBO_h, blurVBO, blurVAO, blurEBO;
-    // glGenBuffers(1, &blurEBO);
-    // glGenBuffers(1, &blurVBO);
-    // glGenVertexArrays(1, &blurVAO);
-    // glGenFramebuffers(1, &blurFBO_v);
-    // glBindFramebuffer(GL_FRAMEBUFFER, blurFBO_v);
+    Shader blurShader("../../Render-ScreenSpace/shader/blur.vert","../../Render-ScreenSpace/shader/blur.frag");
+    unsigned int blurFBO_v, blurFBO_h, blurVBO, blurVAO, blurEBO;
+    glGenBuffers(1, &blurEBO);
+    glGenBuffers(1, &blurVBO);
+    glGenVertexArrays(1, &blurVAO);
+    glGenFramebuffers(1, &blurFBO_v);
+    glBindFramebuffer(GL_FRAMEBUFFER, blurFBO_v);
 
-    // GLuint blurTex_v;
-    // glGenTextures(1, &blurTex_v);
-    // glBindTexture(GL_TEXTURE_2D, blurTex_v);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    // glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-    // glBindTexture(GL_TEXTURE_2D, 0);
-    // glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, blurTex_v, 0);
+    GLuint blurTex_v;
+    glGenTextures(1, &blurTex_v);
+    glBindTexture(GL_TEXTURE_2D, blurTex_v);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, blurTex_v, 0);
 
     
-    // glGenBuffers(1, &blurEBO);
-    // glGenBuffers(1, &blurVBO);
-    // glGenVertexArrays(1, &blurVAO);
-    // glGenFramebuffers(1, &blurFBO_h);
-    // glBindFramebuffer(GL_FRAMEBUFFER, blurFBO_h);
+    glGenBuffers(1, &blurEBO);
+    glGenBuffers(1, &blurVBO);
+    glGenVertexArrays(1, &blurVAO);
+    glGenFramebuffers(1, &blurFBO_h);
+    glBindFramebuffer(GL_FRAMEBUFFER, blurFBO_h);
 
-    // GLuint blurTex_h;
-    // glGenTextures(1, &blurTex_h);
-    // glBindTexture(GL_TEXTURE_2D, blurTex_h);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    // glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-    // glBindTexture(GL_TEXTURE_2D, 0);
-    // glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, blurTex_h, 0);
+    GLuint blurTex_h;
+    glGenTextures(1, &blurTex_h);
+    glBindTexture(GL_TEXTURE_2D, blurTex_h);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, blurTex_h, 0);
 
-    // //--------------------------------------------------THICKNESS SHADER PROGRAM--------------------------------------
-    // Shader thicknessShader("../../Render-ScreenSpace/shader/sprite.vert","../../Render-ScreenSpace/shader/thickness.frag");
-    // unsigned int thickFBO, thickVBO, thickVAO, thickEBO;
-    // glGenBuffers(1, &thickEBO);
-    // glGenBuffers(1, &thickVBO);
-    // glGenVertexArrays(1, &thickVAO);
-    // glGenFramebuffers(1, &thickFBO);
-    // glBindFramebuffer(GL_FRAMEBUFFER, thickFBO);
+    //--------------------------------------------------THICKNESS SHADER PROGRAM--------------------------------------
+    Shader thicknessShader("../../Render-ScreenSpace/shader/sprite.vert","../../Render-ScreenSpace/shader/thickness.frag");
+    unsigned int thickFBO, thickVBO, thickVAO, thickEBO;
+    glGenBuffers(1, &thickEBO);
+    glGenBuffers(1, &thickVBO);
+    glGenVertexArrays(1, &thickVAO);
+    glGenFramebuffers(1, &thickFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, thickFBO);
 
-    // GLuint thickTex;
-    // glGenTextures(1, &thickTex);
-    // glBindTexture(GL_TEXTURE_2D, thickTex);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
-    // glBindTexture(GL_TEXTURE_2D, 0);
-    // glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, thickTex, 0);
+    GLuint thickTex;
+    glGenTextures(1, &thickTex);
+    glBindTexture(GL_TEXTURE_2D, thickTex);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, thickTex, 0);
 
-    // //------------------------------------------------FINAL COMPILATION------------------------------------------------
-    // Shader finalShader("../../Render-ScreenSpace/shader/final.vert", "../../Render-ScreenSpace/shader/final.frag");
-    // unsigned int finalFBO, finalVBO, finalVAO, finalEBO;
-    // glGenBuffers(1, &finalEBO);
-    // glGenBuffers(1, &finalVBO);
-    // glGenVertexArrays(1, &finalVAO);
-    // glGenFramebuffers(1, &finalFBO);
-    // glBindFramebuffer(GL_FRAMEBUFFER, finalFBO);
+    //------------------------------------------------(Apparently PreFinal) COMPILATION------------------------------------------------
+    Shader finalShader("../../Render-ScreenSpace/shader/final.vert", "../../Render-ScreenSpace/shader/final.frag");
+    unsigned int finalFBO, finalVBO, finalVAO, finalEBO;
+    glGenBuffers(1, &finalEBO);
+    glGenBuffers(1, &finalVBO);
+    glGenVertexArrays(1, &finalVAO);
+    glGenFramebuffers(1, &finalFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, finalFBO);
 
-    // GLuint finalTex;
-    // glGenTextures(1, &finalTex);
-    // glBindTexture(GL_TEXTURE_2D, finalTex);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
-    // glBindTexture(GL_TEXTURE_2D, 0);
-    // glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, finalTex, 0);
+    GLuint finalTex;
+    glGenTextures(1, &finalTex);
+    glBindTexture(GL_TEXTURE_2D, finalTex);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, finalTex, 0);
 
+    //-----------------------------------------------------------FINAL COMPILATION-------------------------------------
+    // Shader fShader("f.vert", "f.frag");
+    // GLuint fFBO, fEBO, fVBO, fVAO;
+    // initBuffers(fFBO, fEBO, fVBO, fVAO);
+    // GLuint fTEX;
+    // initTexture(SCR_WIDTH, SCR_HEIGHT, GL_RGBA, GL_RGBA32F, fTEX);
+    // glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fTEX, 0);
     //-----------------------------------------------RENDER LOOP-------------------------------------------------------
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -327,7 +334,7 @@ int main()
         glm::mat4 view = camera.GetViewMatrix();
         depthShader.setMat4("view", view);
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);  //THis enables the buffer for drawing
+        // glBindFramebuffer(GL_FRAMEBUFFER, 0);  //THis enables the buffer for drawing
         glBindVertexArray(depthVAO);
         glDisable(GL_BLEND);
 	    glEnable(GL_DEPTH_TEST);
@@ -344,71 +351,80 @@ int main()
         }
         glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
         
-        
-        // //-----------------------Add Shader program for Blur----------------------
-        // blurShader.use();
-        // // // vertical blur
-        // glBindFramebuffer(GL_FRAMEBUFFER, blurFBO_v);
-        // glDrawBuffer(GL_NONE);
-        // glReadBuffer(GL_NONE);
+        //-----------------------Add Shader program for Blur----------------------
+        blurShader.use();
+        // // vertical blur
+        glBindFramebuffer(GL_FRAMEBUFFER, blurFBO_v);
+        glDrawBuffer(GL_NONE);
+        glReadBuffer(GL_NONE);
 
-        // glClear(GL_DEPTH_BUFFER_BIT);
-        // // // vertical quad
-        // GLfloat vertices[] = {
-        //         1.0f,  1.0f,
-        //         1.0f, -1.0f,
-        //     -1.0f, -1.0f,
-        //     -1.0f,  1.0f
-        // };
-        // GLuint indices[] = {
-        //     0, 1, 3,
-        //     1, 2, 3
-        // };
+        glClear(GL_DEPTH_BUFFER_BIT);
+        // // vertical quad
+        GLfloat vertices[] = {
+                1.0f,  1.0f,
+                1.0f, -1.0f,
+            -1.0f, -1.0f,
+            -1.0f,  1.0f
+        };
+        GLuint indices[] = {
+            0, 1, 3,
+            1, 2, 3
+        };
 
-        // glBindVertexArray(blurVAO);
-        // glBindBuffer(GL_ARRAY_BUFFER, blurVBO);
-        // glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-        // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, blurEBO);
-        // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-        // glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
-        // glEnableVertexAttribArray(0);
+        // glBindFramebuffer(GL_FRAMEBUFFER, 0);  //THis enables the buffer for drawing
+        glBindVertexArray(blurVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, blurVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, blurEBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
+        glEnableVertexAttribArray(0);
 
-        // glActiveTexture(GL_TEXTURE0);
-        // glBindTexture(GL_TEXTURE_2D, blurTex_v);
-        // GLint depthMAP = glGetUniformLocation(blurShader.ID, "depthMap");
-        // glUniform1i(depthMAP, 0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, depthTEX);
+        GLint depthMAP = glGetUniformLocation(blurShader.ID, "depthMap");
+        glUniform1i(depthMAP, 0);
 
-        // blurShader.setMat4("projection", projection);
-        // blurShader.setVec2("screenSize", glm::vec2(SCR_WIDTH, SCR_HEIGHT));
-        // blurShader.setVec2("blurDir", blurDirY);
-        // blurShader.setFloat("filterRadius", filterRadius);
-        // blurShader.setFloat("blurScale", 0.1f);
+        blurShader.setMat4("projection", projection);
+        blurShader.setVec2("screenSize", glm::vec2(SCR_WIDTH, SCR_HEIGHT));
+        blurShader.setVec2("blurDir", blurDirY);
+        blurShader.setFloat("filterRadius", filterRadius);
+        blurShader.setFloat("blurScale", 0.1f);
 
-        // glEnable(GL_DEPTH_TEST);
+        glEnable(GL_DEPTH_TEST);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    
+        // // Horizontal Blur
+        glBindFramebuffer(GL_FRAMEBUFFER, blurFBO_h);
+        glDrawBuffer(GL_NONE);
+        glReadBuffer(GL_NONE);
 
-        // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glClear(GL_DEPTH_BUFFER_BIT);
 
-        // // // Horizontal Blur
-        // glBindFramebuffer(GL_FRAMEBUFFER, blurFBO_h);
-        // glDrawBuffer(GL_NONE);
-        // glReadBuffer(GL_NONE);
+        glBindVertexArray(blurVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, blurVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, blurEBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
+        glEnableVertexAttribArray(0);
 
-        // glClear(GL_DEPTH_BUFFER_BIT);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, blurTex_v);
+        depthMAP = glGetUniformLocation(blurShader.ID, "depthMap");
+        glUniform1i(depthMAP, 0);
 
-        // glActiveTexture(GL_TEXTURE0);
-        // glBindTexture(GL_TEXTURE_2D, blurTex_h);
-        // depthMAP = glGetUniformLocation(blurShader.ID, "depthMap");
-        // glUniform1i(depthMAP, 0);
+        blurShader.setMat4("projection", projection);
+        blurShader.setVec2("screenSize", glm::vec2(SCR_WIDTH, SCR_HEIGHT));
+        blurShader.setVec2("blurDir", blurDirX);
+        blurShader.setFloat("filterRadius", filterRadius);
+        blurShader.setFloat("blurScale", 0.1f);
 
-        // blurShader.setMat4("projection", projection);
-        // blurShader.setVec2("screenSize", glm::vec2(SCR_WIDTH, SCR_HEIGHT));
-        // blurShader.setVec2("blurDir", blurDirY);
-        // blurShader.setFloat("filterRadius", filterRadius);
-        // blurShader.setFloat("blurScale", 0.1f);
-
-        // glEnable(GL_DEPTH_TEST);
-        // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        // glDisable(GL_DEPTH_TEST);
+        glEnable(GL_DEPTH_TEST);
+        // glBindFramebuffer(GL_FRAMEBUFFER, 0);  //THis enables the buffer for drawing
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDisable(GL_DEPTH_TEST);
 
         // //------------------------------THICKNESS OF FLUID PROGRAM-------------------------------------
         // thicknessShader.use();
@@ -423,6 +439,7 @@ int main()
         // depthShader.setMat4("projection", projection);
         // depthShader.setMat4("view", view);
 
+        // // glBindFramebuffer(GL_FRAMEBUFFER, 0);
         // glEnable(GL_BLEND);
         // glBlendFunc(GL_ONE, GL_ONE);
         // glBlendEquation(GL_FUNC_ADD);
@@ -443,7 +460,7 @@ int main()
         // glDisable(GL_DEPTH_TEST);
         // glDisable(GL_BLEND);
 
-        // //------------------------------COMPILATION OF ALL STEPS----------------------------------------
+        // // //------------------------------COMPILATION OF ALL STEPS----------------------------------------
         // finalShader.use();
         // glBindFramebuffer(GL_FRAMEBUFFER, finalFBO);
 
@@ -480,26 +497,27 @@ int main()
         // finalShader.setVec2("invTexScale", glm::vec2(1.0f/SCR_WIDTH, 1.0f/SCR_HEIGHT));
         // finalShader.setVec4("color", color);
 
+        // glBindFramebuffer(GL_FRAMEBUFFER, 0);
         // glEnable(GL_DEPTH_TEST);
         // glDepthMask(GL_TRUE);
         // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         // glDisable(GL_DEPTH_TEST);
 
         //-----------------------DRAW SKYBOX at last (ENable and Disable the Depth test)----------------
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
-        skyboxShader.use();
-        view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix
-        skyboxShader.setMat4("view", view);
-        skyboxShader.setMat4("projection", projection);
-        // skybox cube
-        glBindVertexArray(skyboxVAO);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        glBindVertexArray(0);
-        glDepthFunc(GL_LESS); // set depth function back to default
-        glDisable(GL_DEPTH_TEST);
+        // glEnable(GL_DEPTH_TEST);
+        // glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
+        // skyboxShader.use();
+        // view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix
+        // skyboxShader.setMat4("view", view);
+        // skyboxShader.setMat4("projection", projection);
+        // // skybox cube
+        // glBindVertexArray(skyboxVAO);
+        // glActiveTexture(GL_TEXTURE0);
+        // glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+        // glDrawArrays(GL_TRIANGLES, 0, 36);
+        // glBindVertexArray(0);
+        // glDepthFunc(GL_LESS); // set depth function back to default
+        // glDisable(GL_DEPTH_TEST);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
