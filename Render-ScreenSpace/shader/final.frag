@@ -37,6 +37,7 @@ void main() {
 
 	if (depth == 1.0) {
 		fragColor = scene;
+		// fragColor = vec4(1.0f, 0.5f, 0.1f, 1.0f);
 		return;
 	}
 
@@ -74,8 +75,10 @@ void main() {
 	refractScale *= smoothstep(0.1, 0.4, worldPos.y);
 	vec2 refractCoord = coord + normal.xy*refractScale*texScale;
 
-	float thickness = max(texture(thicknessMap, coord).x, 0.3);
+	float thickness = max(texture(thicknessMap, refractCoord).x, 0.3);
+	// float thickness = max(texture(thicknessMap, coord).x, 0.3);
 	vec3 transmission = exp(-(vec3(1.0)-color.xyz)*thickness);
+	// vec3 transmission = (1.0-(1.0-color.xyz)*thickness*0.8)*color.w;
 
 	vec3 refract = texture(sceneMap, refractCoord).xyz*transmission;
     
@@ -88,7 +91,8 @@ void main() {
     float fresnel = fresBias + fresScale * pow(1.0f - max(dot(normal, viewDir), 0.0), fresPower);
 
 	//Diffuse light
-	vec3 diffuse = color.xyz * mix(vec3(0.29, 0.379, 0.59), vec3(1.0), (ln*0.5 + 0.5)) * (1 - color.w);
+	// vec3 diffuse = color.xyz * mix(vec3(0.29, 0.379, 0.59), vec3(1.0), (ln*0.5 + 0.5)) * (1 - color.w);
+	vec3 diffuse = color.xyz * mix(vec3(0.29, 0.379, 0.59), vec3(1.0), (ln*0.5 + 0.5));
 
 	vec3 skyColor = vec3(0.1, 0.2, 0.4)*1.2;
 	vec3 groundColor = vec3(0.1, 0.1, 0.2);
@@ -100,9 +104,8 @@ void main() {
     
     //Compositing everything
     vec3 finalColor = diffuse + (mix(refract, reflect, fresnel) + specular) * color.w;
-	// vec3 finalColor = diffuse;
+
 	fragColor = vec4(finalColor, 1.0);
 
-	// fragColor = vec4(vec3(depth),1.0);
 	gl_FragDepth = depth;
 }

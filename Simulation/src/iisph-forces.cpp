@@ -26,6 +26,8 @@ namespace SPH
     }
     static Helper::Point3D PolyKernelGradient(const Helper::Point3D diffParticleNeighbour)
     {
+        double diffNorm = diffParticleNeighbour.calcNormSqr();
+        if(diffNorm==0) diffNorm = Config::ParticleRadius*Config::ParticleRadius/4;
         return -1 * Grad_Poly_Kernel_Coeff * diffParticleNeighbour * pow((Config::SupportRadius * Config::SupportRadius - diffParticleNeighbour.calcNormSqr()),2);
     }
 
@@ -44,7 +46,7 @@ namespace SPH
             #pragma omp parallel for 
             for(size_t j = 0; j < particleVec[i].neighbours.size(); j++)
             {
-                // if(i == particleVec[i].neighbours[j])continue;
+                if(i == particleVec[i].neighbours[j])continue;
                 const Helper::Point3D diffParticleNeighbour = particleVec[i].position - particleVec[particleVec[i].neighbours[j]].position;
 
                 if(Config::SupportRadius - diffParticleNeighbour.calcNorm() > DBL_EPSILON)
@@ -52,6 +54,8 @@ namespace SPH
                     densityVal += particleVec[particleVec[i].neighbours[j]].mass * PolyKernel(diffParticleNeighbour);
                 }
             }
+            // std::cout << densityVal << "  ";
+            if(densityVal==0) densityVal=100;
             particleVec[i].density = densityVal;
         }
     }
@@ -78,7 +82,7 @@ namespace SPH
         for(auto& particle: particleVec)
         {
             particle.predicted_velocity = particle.velocity + Config::timestep*particle.fAdvection/particle.mass;
-            // if(std::isnan(particle.velocity.x) || std::isnan(particle.velocity.y) || std::isnan(particle.velocity.z))std::cout << " ii -> " << " " << particle.neighbours.size();
+            // if(std::isnan(particle.velocity.x) || std::isnan(particle.velocity.y) || std::isnan(particle.velocity.z))std::cout << " cpVelocity -> " << " " << particle.neighbours.size();
         }
     }
     void IISPHForces::compute_DII(ParticleVec& particleVec)
@@ -92,12 +96,13 @@ namespace SPH
             {
                 if(i == particleVec[i].neighbours[j])continue;
                 const Helper::Point3D diffParticleNeighbour = particleVec[i].position - particleVec[particleVec[i].neighbours[j]].position;
+                
                 if(Config::SupportRadius - diffParticleNeighbour.calcNorm() > DBL_EPSILON && diffParticleNeighbour.calcNorm()!=0)
                 {
                     finalDII += -1 * Config::timestep * Config::timestep * particleVec[particleVec[i].neighbours[j]].mass * PolyKernelGradient(diffParticleNeighbour)/(particleVec[i].density*particleVec[i].density); 
                 }
             }
-            if(std::isnan(finalDII.x) || std::isnan(finalDII.y) || std::isnan(finalDII.z)) std::cout << i << std::endl;
+            if(std::isnan(finalDII.x) || std::isnan(finalDII.y) || std::isnan(finalDII.z)) std::cout <<  "computeDII" << i << std::endl;
             particleVec[i].dii = finalDII;
         }
     }
@@ -137,6 +142,11 @@ namespace SPH
                     
                     aiiSUM += pV[pV[i].neighbours[j]].mass *(pV[i].dii - dji).dot(PolyKernelGradient(diffParticleNeighbour));
                 }
+            }
+            if(aiiSUM == 0) 
+            {
+                Helper::Point3D dPN = Helper::Point3D(1.5*Config::ParticleRadius, 1.5*Config::ParticleRadius, 1.5*Config::ParticleRadius);
+                aiiSUM=pV[i].mass * (pV[i].dii + Config::timestep*Config::timestep*(pV[i].mass/pow(pV[i].density,2))*PolyKernelGradient(-1*dPN)).dot(PolyKernelGradient(dPN));
             }
             pV[i].aii = aiiSUM;
         }
@@ -197,10 +207,12 @@ namespace SPH
                     corr_density += pV[pV[i].neighbours[j]].mass * (pV[i].sigma_dij - (pV[pV[i].neighbours[j]].dii * pV[pV[i].neighbours[j]].prev_iterate_pressure) - (pV[pV[i].neighbours[j]].sigma_dij - dji*pV[i].pressure)).dot(PolyKernelGradient(-1*diffParticleNeighbour));
 
                 }
+                // if(pV[i].aii==0) std::cout << " " << i << " ";
                 pV[i].curr_iterate_pressure = std::max((1 - Config::RelaxationFactor)*pV[i].prev_iterate_pressure +
                                                         (Config::RelaxationFactor / pV[i].aii) *
                                                         (Config::WaterDensity - pV[i].predicted_density - corr_density),0.0);
                                                         // (pV[i].density - pV[i].predicted_density - corr_density);
+                // if(pV[i].aii==0) std::cout << pV[i].curr_iterate_pressure << " ";
                 pV[i].pressure = pV[i].curr_iterate_pressure;
             }
             l++;
@@ -227,6 +239,7 @@ namespace SPH
             const Helper::Point3D diffParticleNeighbour = pV[i].position - pV[pV[i].neighbours[j]].position;
             if(!diffParticleNeighbour.calcNorm())continue;
             forceSum += pV[pV[i].neighbours[j]].mass * ((pV[i].pressure/pow(pV[i].density,2)) + (pV[pV[i].neighbours[j]].pressure/pow(pV[pV[i].neighbours[j]].density,2))) * PolyKernelGradient(diffParticleNeighbour);
+            // if(std::isnan(pV[i].pressure)) std::cout << "cpf " << i ;
         }
 
         return forceSum * -1 * pV[i].mass;
@@ -236,11 +249,20 @@ namespace SPH
         #pragma omp parallel for
         for(size_t i=0; i < particleVec.size(); i++)
         {
+            if(std::isnan(particleVec[i].velocity.x) || std::isnan(particleVec[i].velocity.y) || std::isnan(particleVec[i].velocity.z))
+            {
+                particleVec[i].predicted_velocity = Helper::Point3D(1,1,1);
+            }
             particleVec[i].velocity = particleVec[i].predicted_velocity + Config::timestep * compute_pressure_force(particleVec, i)/particleVec[i].mass ;
-            // if(std::isnan(particleVec[i].predicted_velocity.x) || std::isnan(particleVec[i].predicted_velocity.y) || std::isnan(particleVec[i].predicted_velocity.z))std::cout << " ii -> "<< i << " " << particleVec[i].neighbours.size();
+            // if(std::isnan(compute_pressure_force(particleVec, i).x) || std::isnan(compute_pressure_force(particleVec, i).y) || std::isnan(compute_pressure_force(particleVec, i).z))std::cout << " ii -> "<< i << " " << particleVec[i].neighbours.size();
+            // std::cout << compute_pressure_force(particleVec, i) << std::endl;
         }
         for(size_t i=0; i< particleVec.size(); i++)
         {
+            // if(std::isnan(particleVec[i].velocity.x) || std::isnan(particleVec[i].velocity.y) || std::isnan(particleVec[i].velocity.z))
+            // {
+            //     particleVec[i].velocity = Helper::Point3D(0,0,0);
+            // }
             particleVec[i].position += Config::timestep * particleVec[i].velocity;
         }
     }

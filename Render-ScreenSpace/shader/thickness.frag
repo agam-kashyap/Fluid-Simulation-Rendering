@@ -7,7 +7,6 @@ uniform mat4 model;
 uniform mat4 projection;
 
 out float thickness;
-// out vec4 FragColor;
 
 void main() {
 	//calculate normal
@@ -22,5 +21,4 @@ void main() {
 	normal.z = sqrt(1 - r2);
 	
 	float thickness = normal.z * 0.005f;
-	// FragColor = vec4(vec3(thickness), 1.0);
 }

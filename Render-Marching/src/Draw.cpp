@@ -119,12 +119,12 @@ void MyDisplay(void)
 
     
 
-    // sph->Run();
+    sph->Run();
 
     const float cubeSize = static_cast<float>(SPH::Config::BoxWidth);
 
     glLoadIdentity();
-    gluLookAt(3.0, 2.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10.0);
+    gluLookAt(3.0, 20.0, 12.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10.0);
     glTranslatef(SPH::Config::BoxWidth/2,SPH::Config::BoxWidth/2,SPH::Config::BoxWidth/2);
     glRotatef(angle, 0, 0, -1);
     glTranslatef(-SPH::Config::BoxWidth/2, -SPH::Config::BoxWidth/2, -SPH::Config::BoxWidth/2);

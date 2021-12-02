@@ -27,6 +27,7 @@ namespace SPH
         params(),
         SimulationObstacle(obstacle)
         {
+            // Dam Related Configuration
             double x_pos = Config::ParticleRadius ;
             double y_pos = Config::ParticleRadius ;
             double z_pos = Config::ParticleRadius;
@@ -35,7 +36,6 @@ namespace SPH
             int Y_prev = 0;
             int Z_prev = 0;
             srand( (unsigned)time( NULL ) );
-
             for(size_t i = 0u; i < Config::ParticleCount; i++)
             {
                 particles[i] = Helper::Point3D(x_pos, y_pos, z_pos);
@@ -88,9 +88,44 @@ namespace SPH
                     z_pos += 2*Config::ParticleRadius;
                 }
             }
-            params.copyPoints = true;
+            // // Sphere shaped drop creation
+            // double r = 2 * Config::ParticleRadius;
+            // double fi = 0.;
+            // double teta = 0.;
 
-            // octree.initialize(particles);
+            // size_t M = 5;
+            // size_t N = 5;
+
+            // size_t m = 0;
+            // size_t n = 0;
+        
+            // for(size_t i = 0u; i < Config::ParticleCount; i++)
+            // {
+            //     particles[i] = SpericalToCartesian(r, fi, teta);
+            //     particles[i].velocity = Config::InitVelocity;
+            //     particles[i].mass = Config::WaterParticleMass;
+
+            //     ++n;
+
+            //     fi = 2 * PI * n / N;
+            //     teta = PI * m / M;
+
+            //     if (n == N)
+            //     {
+            //         ++m;
+            //         n = 0;
+            //     }
+
+            //     if (m == M)
+            //     {
+            //         n = 0;
+            //         m = 0;
+            //         r += 2 * Config::ParticleRadius;
+            //         M += 2;
+            //         N += 2;
+            //     }
+            // }
+            params.copyPoints = true;
         }
     
     void Simulation::Run()
@@ -116,14 +151,14 @@ namespace SPH
         IISPHForces::integration(particles);
         IISPHForces::compute_density(particles);
 
-        for(size_t i=0; i< Config::ParticleCount; i++)
-        {
-            if(std::isnan(particles[i].position.x) || std::isnan(particles[i].position.y) || std::isnan(particles[i].position.z))
-            {
-                std::cout << i << " -!- " << particles[i].position;
-                exit(0);
-            }
-        }
+        // for(size_t i=0; i< Config::ParticleCount; i++)
+        // {
+        //     if(std::isnan(particles[i].position.x) || std::isnan(particles[i].position.y) || std::isnan(particles[i].position.z))
+        //     {
+        //         std::cout << i << " -!- " << particles[i].position;
+        //         exit(0);
+        //     }
+        // }
         octree.initialize(particles);
         for(size_t i=0u; i < Config::ParticleCount; i++)
         {

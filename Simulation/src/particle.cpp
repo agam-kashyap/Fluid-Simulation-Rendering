@@ -17,6 +17,7 @@ namespace SPH
         // supportRadius(0.0),
         position(Helper::Point3D()),
         newposition(Helper::Point3D()),
+        prev_position(Helper::Point3D()),
         velocity(Helper::Point3D()),
         predicted_velocity(Helper::Point3D()),
         acceleration(Helper::Point3D()),

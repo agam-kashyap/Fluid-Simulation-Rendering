@@ -11,12 +11,9 @@ uniform float blurScale;
 
 const float blurDepthFalloff = 65.0f;
 
-// out vec4 FragColor;
-
 void main() {
 	float depth = texture(depthMap, coord).x;
 
-	// FragColor = vec4(0.0, depth, 0.0, 1.0);
 	if (depth <= 0.0f) {
 		gl_FragDepth = 0;
 		return;
@@ -50,5 +47,4 @@ void main() {
 	}
 
 	gl_FragDepth = sum;
-	// FragColor = vec4(vec3(sum), 1.0);
 }
