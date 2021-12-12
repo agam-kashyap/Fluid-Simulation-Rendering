@@ -16,7 +16,7 @@ namespace SPH
 {
     inline Helper::Point3D SpericalToCartesian(double r, double fi, double teta)
     {
-        return Helper::Point3D(r * sin(teta) * cos(fi) + 1.5, r * sin(teta) * sin(fi) + 1.5, r * cos(teta) + 2.);
+        return Helper::Point3D(r * sin(teta) * cos(fi) + 0.5, r * sin(teta) * sin(fi) + 0.5, r * cos(teta) + 1.);
     }
     Simulation::Simulation(const std::function<float(float, float, float)>* obstacle):
         minDensity(0),
@@ -27,104 +27,104 @@ namespace SPH
         params(),
         SimulationObstacle(obstacle)
         {
-            // Dam Related Configuration
-            double x_pos = Config::ParticleRadius ;
-            double y_pos = Config::ParticleRadius ;
-            double z_pos = Config::ParticleRadius;
+            // // Dam Related Configuration
+            // double x_pos = Config::ParticleRadius ;
+            // double y_pos = Config::ParticleRadius ;
+            // double z_pos = Config::ParticleRadius;
 
-            int X_prev = 0;
-            int Y_prev = 0;
-            int Z_prev = 0;
-            srand( (unsigned)time( NULL ) );
-            for(size_t i = 0u; i < Config::ParticleCount; i++)
-            {
-                particles[i] = Helper::Point3D(x_pos, y_pos, z_pos);
-                particles[i].velocity = Config::InitVelocity;
-                particles[i].mass = Config::WaterParticleMass ;
-                //-----------------Arranges in a Honey Comb Shaped Structure -------
-                // x_pos += 2* Config::ParticleRadius;
-                // if(x_pos > 1.0)
-                // {
-                //     if(!X_prev)
-                //     {
-                //         X_prev = 1;
-                //         x_pos = 2*Config::ParticleRadius;
-                //     }
-                //     else
-                //     {
-                //         X_prev = 0;
-                //         x_pos = Config::ParticleRadius;
-                //     }
-                //     y_pos += sqrt(3)*Config::ParticleRadius;
-                // }
-                // if(y_pos > 1.0)
-                // {
-                //     if(!Z_prev)
-                //     {
-                //         Z_prev = 1;
-                //         X_prev = 1;
-                //         x_pos = 2*Config::ParticleRadius;
-                //         y_pos = Config::ParticleRadius*(1 + sqrt(3)/2);
-                //     }
-                //     else
-                //     {
-                //         Z_prev = 0;
-                //         X_prev = 0;
-                //         x_pos = Config::ParticleRadius;
-                //         y_pos = Config::ParticleRadius; 
-                //     }
-                //     z_pos += 1.5*Config::ParticleRadius;
-                // }
-                //----------------Arranges in Dam shape--------
-                x_pos += 2* Config::ParticleRadius;
-                if(x_pos > 1.0)
-                {
-                    x_pos = Config::ParticleRadius ;//+ 1.5;
-                    y_pos += 2*Config::ParticleRadius;
-                }
-                if(y_pos > 1.0)
-                {
-                    y_pos = Config::ParticleRadius ;//+ 1.5;
-                    z_pos += 2*Config::ParticleRadius;
-                }
-            }
-            // // Sphere shaped drop creation
-            // double r = 2 * Config::ParticleRadius;
-            // double fi = 0.;
-            // double teta = 0.;
-
-            // size_t M = 5;
-            // size_t N = 5;
-
-            // size_t m = 0;
-            // size_t n = 0;
-        
+            // int X_prev = 0;
+            // int Y_prev = 0;
+            // int Z_prev = 0;
+            // srand( (unsigned)time( NULL ) );
             // for(size_t i = 0u; i < Config::ParticleCount; i++)
             // {
-            //     particles[i] = SpericalToCartesian(r, fi, teta);
+            //     particles[i] = Helper::Point3D(x_pos, y_pos, z_pos);
             //     particles[i].velocity = Config::InitVelocity;
-            //     particles[i].mass = Config::WaterParticleMass;
-
-            //     ++n;
-
-            //     fi = 2 * PI * n / N;
-            //     teta = PI * m / M;
-
-            //     if (n == N)
+            //     particles[i].mass = Config::WaterParticleMass ;
+            //     //-----------------Arranges in a Honey Comb Shaped Structure -------
+            //     // x_pos += 2* Config::ParticleRadius;
+            //     // if(x_pos > 1.0)
+            //     // {
+            //     //     if(!X_prev)
+            //     //     {
+            //     //         X_prev = 1;
+            //     //         x_pos = 2*Config::ParticleRadius;
+            //     //     }
+            //     //     else
+            //     //     {
+            //     //         X_prev = 0;
+            //     //         x_pos = Config::ParticleRadius;
+            //     //     }
+            //     //     y_pos += sqrt(3)*Config::ParticleRadius;
+            //     // }
+            //     // if(y_pos > 1.0)
+            //     // {
+            //     //     if(!Z_prev)
+            //     //     {
+            //     //         Z_prev = 1;
+            //     //         X_prev = 1;
+            //     //         x_pos = 2*Config::ParticleRadius;
+            //     //         y_pos = Config::ParticleRadius*(1 + sqrt(3)/2);
+            //     //     }
+            //     //     else
+            //     //     {
+            //     //         Z_prev = 0;
+            //     //         X_prev = 0;
+            //     //         x_pos = Config::ParticleRadius;
+            //     //         y_pos = Config::ParticleRadius; 
+            //     //     }
+            //     //     z_pos += 1.5*Config::ParticleRadius;
+            //     // }
+            //     //----------------Arranges in Dam shape--------
+            //     x_pos += 2* Config::ParticleRadius;
+            //     if(x_pos > 1.0)
             //     {
-            //         ++m;
-            //         n = 0;
+            //         x_pos = Config::ParticleRadius ;//+ 1.5;
+            //         y_pos += 2*Config::ParticleRadius;
             //     }
-
-            //     if (m == M)
+            //     if(y_pos > 1.0)
             //     {
-            //         n = 0;
-            //         m = 0;
-            //         r += 2 * Config::ParticleRadius;
-            //         M += 2;
-            //         N += 2;
+            //         y_pos = Config::ParticleRadius ;//+ 1.5;
+            //         z_pos += 2*Config::ParticleRadius;
             //     }
             // }
+            // Sphere shaped drop creation
+            double r = 2 * Config::ParticleRadius;
+            double fi = 0.;
+            double teta = 0.;
+
+            size_t M = 5;
+            size_t N = 5;
+
+            size_t m = 0;
+            size_t n = 0;
+        
+            for(size_t i = 0u; i < Config::ParticleCount; i++)
+            {
+                particles[i] = SpericalToCartesian(r, fi, teta);
+                particles[i].velocity = Config::InitVelocity;
+                particles[i].mass = Config::WaterParticleMass;
+
+                ++n;
+
+                fi = 2 * PI * n / N;
+                teta = PI * m / M;
+
+                if (n == N)
+                {
+                    ++m;
+                    n = 0;
+                }
+
+                if (m == M)
+                {
+                    n = 0;
+                    m = 0;
+                    r += 2 * Config::ParticleRadius;
+                    M += 2;
+                    N += 2;
+                }
+            }
             params.copyPoints = true;
         }
     

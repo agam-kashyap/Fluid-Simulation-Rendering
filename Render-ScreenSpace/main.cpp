@@ -27,8 +27,8 @@ unsigned int loadCubemap(std::vector<std::string> faces);
 
 
 // settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 900;
+const unsigned int SCR_HEIGHT = 900;
 static const glm::vec2 blurDirX = glm::vec2(1.0f / SCR_WIDTH, 0.0f);
 static const glm::vec2 blurDirY = glm::vec2(0.0f, 1.0f / SCR_HEIGHT);
 static float filterRadius = 10;

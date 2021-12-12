@@ -9,7 +9,7 @@ int main()
 {
     SPH::Simulation* sph = new SPH::Simulation(nullptr);
 
-    std::string fileName = "dam-12000frames-aiiSolutionTry-" + std::to_string(SPH::Config::ParticleCount) + ".r-" + std::to_string(SPH::Config::ParticleRadius) + ".txt";
+    std::string fileName = "sphere-12000frames-aiiverysmallCube-" + std::to_string(SPH::Config::ParticleCount) + ".r-" + std::to_string(SPH::Config::ParticleRadius) + ".txt";
     std::cout << fileName << std::endl;
     float progress = 0.0;
     int particleCount = sph->particles.size();

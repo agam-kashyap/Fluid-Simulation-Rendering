@@ -54,7 +54,6 @@ namespace SPH
                     densityVal += particleVec[particleVec[i].neighbours[j]].mass * PolyKernel(diffParticleNeighbour);
                 }
             }
-            // std::cout << densityVal << "  ";
             if(densityVal==0) densityVal=100;
             particleVec[i].density = densityVal;
         }
@@ -65,7 +64,6 @@ namespace SPH
         for(auto& particle: particleVec)
         {
             particle.fGravity = Config::GravitationalAcceleration * particle.mass;
-            // particle.fGravity = Config::GravitationalAcceleration * particle.density; 
         }
     }
     void IISPHForces::compute_advection_forces(ParticleVec& particleVec)
@@ -82,7 +80,6 @@ namespace SPH
         for(auto& particle: particleVec)
         {
             particle.predicted_velocity = particle.velocity + Config::timestep*particle.fAdvection/particle.mass;
-            // if(std::isnan(particle.velocity.x) || std::isnan(particle.velocity.y) || std::isnan(particle.velocity.z))std::cout << " cpVelocity -> " << " " << particle.neighbours.size();
         }
     }
     void IISPHForces::compute_DII(ParticleVec& particleVec)
@@ -207,12 +204,9 @@ namespace SPH
                     corr_density += pV[pV[i].neighbours[j]].mass * (pV[i].sigma_dij - (pV[pV[i].neighbours[j]].dii * pV[pV[i].neighbours[j]].prev_iterate_pressure) - (pV[pV[i].neighbours[j]].sigma_dij - dji*pV[i].pressure)).dot(PolyKernelGradient(-1*diffParticleNeighbour));
 
                 }
-                // if(pV[i].aii==0) std::cout << " " << i << " ";
                 pV[i].curr_iterate_pressure = std::max((1 - Config::RelaxationFactor)*pV[i].prev_iterate_pressure +
                                                         (Config::RelaxationFactor / pV[i].aii) *
                                                         (Config::WaterDensity - pV[i].predicted_density - corr_density),0.0);
-                                                        // (pV[i].density - pV[i].predicted_density - corr_density);
-                // if(pV[i].aii==0) std::cout << pV[i].curr_iterate_pressure << " ";
                 pV[i].pressure = pV[i].curr_iterate_pressure;
             }
             l++;
@@ -239,7 +233,6 @@ namespace SPH
             const Helper::Point3D diffParticleNeighbour = pV[i].position - pV[pV[i].neighbours[j]].position;
             if(!diffParticleNeighbour.calcNorm())continue;
             forceSum += pV[pV[i].neighbours[j]].mass * ((pV[i].pressure/pow(pV[i].density,2)) + (pV[pV[i].neighbours[j]].pressure/pow(pV[pV[i].neighbours[j]].density,2))) * PolyKernelGradient(diffParticleNeighbour);
-            // if(std::isnan(pV[i].pressure)) std::cout << "cpf " << i ;
         }
 
         return forceSum * -1 * pV[i].mass;
@@ -254,15 +247,9 @@ namespace SPH
                 particleVec[i].predicted_velocity = Helper::Point3D(1,1,1);
             }
             particleVec[i].velocity = particleVec[i].predicted_velocity + Config::timestep * compute_pressure_force(particleVec, i)/particleVec[i].mass ;
-            // if(std::isnan(compute_pressure_force(particleVec, i).x) || std::isnan(compute_pressure_force(particleVec, i).y) || std::isnan(compute_pressure_force(particleVec, i).z))std::cout << " ii -> "<< i << " " << particleVec[i].neighbours.size();
-            // std::cout << compute_pressure_force(particleVec, i) << std::endl;
         }
         for(size_t i=0; i< particleVec.size(); i++)
         {
-            // if(std::isnan(particleVec[i].velocity.x) || std::isnan(particleVec[i].velocity.y) || std::isnan(particleVec[i].velocity.z))
-            // {
-            //     particleVec[i].velocity = Helper::Point3D(0,0,0);
-            // }
             particleVec[i].position += Config::timestep * particleVec[i].velocity;
         }
     }
