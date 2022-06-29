@@ -1,6 +1,6 @@
 # Introduction
 
-This repository contains the code for performing [IISPH][https://cg.informatik.uni-freiburg.de/publications/2013_TVCG_IISPH.pdf] based Fluid Simulation and rendering the same using [Screen Space Fluid Rendering][http://www.cs.rug.nl/~roe/publications/fluidcurvature.pdf]. Currently only tested on a Linux based system, without CUDA support. 
+This repository contains the code for performing [IISPH](https://cg.informatik.uni-freiburg.de/publications/2013_TVCG_IISPH.pdf) based Fluid Simulation and rendering the same using [Screen Space Fluid Rendering](http://www.cs.rug.nl/~roe/publications/fluidcurvature.pdf). Currently tested on a Linux based system, with 16GB RAM, 940MX graphics card without CUDA support. 
 
 # Requirements
 
@@ -11,3 +11,4 @@ This repository contains the code for performing [IISPH][https://cg.informatik.u
 
 # Running Code
 
+# Outputs
