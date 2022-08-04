@@ -18,3 +18,7 @@ This repository contains the code for performing [IISPH](https://cg.informatik.u
 5. Run `make all` in the folder with binaries
 
 # Outputs
+
+![DAM break Demo](Resources/dam.gif)
+
+![Spherical Water Droplet Falling](Resources/sphere.gif)
