@@ -11,4 +11,10 @@ This repository contains the code for performing [IISPH](https://cg.informatik.u
 
 # Running Code
 
+1. Open Project Source code with CMake application
+2. Select the Modules to Build
+3. Configure using `Unix Makefiles`
+4. Generate Binaries
+5. Run `make all` in the folder with binaries
+
 # Outputs
